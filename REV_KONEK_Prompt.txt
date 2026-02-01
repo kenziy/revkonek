@@ -1,0 +1,511 @@
+# REV KONEK - Web Application Development Prompt
+
+## Project Overview
+
+You are building **REV KONEK**, a motorcycle rider community platform that connects riders for challenges, group rides, emergency assistance, and marketplace services. This is a full-stack web application targeting motorcycle enthusiasts aged 18-45 in the Philippines.
+
+---
+
+## Technology Stack
+
+| Layer | Technology |
+|-------|------------|
+| Backend Framework | Laravel 12 |
+| Frontend Framework | React (API-based) |
+| CSS Framework | TailwindCSS |
+| Database | MySQL 8.x |
+| Authentication | Laravel Sanctum |
+| File Storage | Laravel Storage (gcs compatible) |
+| Queue System | Laravel Queue (Database) |
+
+---
+
+## Core Modules
+
+### 1. Authentication & User Management
+
+#### Requirements:
+- Email/password registration with email verification (24-hour window)
+- Social login integration (Google, Facebook, Apple)
+- Password requirements: minimum 8 characters, uppercase, lowercase, number, special character
+- Password strength meter on registration/change forms
+- Prevent reuse of last 5 passwords
+- Session management:
+  - 30-minute idle timeout
+  - 7-day "remember me" option
+  - Maximum 5 concurrent sessions per user
+  - Force logout all sessions on password change
+  - Active sessions view in profile settings
+- Password reset via magic link + temporary code
+- Optional 2FA via TOTP authenticator app with recovery codes
+- Phone number as backup recovery option
+- Age verification: DOB field with 18+ validation at registration
+
+#### Database Tables:
+```
+users, password_reset_tokens, sessions, social_accounts,
+two_factor_codes, recovery_codes, login_attempts
+```
+
+---
+
+### 2. User Profile & Garage
+
+#### Requirements:
+- Profile fields: name, username, avatar, bio, location (city-level), riding experience, riding style
+- Privacy controls:
+  - Profile visibility: Public / Connections Only / Hidden
+  - Online status: Show / Show to Connections / Hide
+  - Location sharing: Precise / City-level / Hidden
+  - Garage visibility: Public / Connections / Private
+- Garage system:
+  - Free tier: up to 2 bikes
+  - Premium tier: unlimited bikes
+  - Bike details: make, model, year, CC, category, modification level (stock/mild/built)
+  - Active bike selector for matchmaking
+  - Photo gallery per bike
+- Block/restrict user functionality
+- Incognito mode for browsing
+
+#### Database Tables:
+```
+user_profiles, user_privacy_settings, bikes, bike_photos,
+user_blocks, user_connections
+```
+
+---
+
+### 3. Challenge/Racing System
+
+#### Race Initiation Workflow:
+1. Challenger sends challenge request with proposed location/time
+2. Challenged user can accept, decline, or counter-propose
+3. 48-hour acceptance window with auto-decline
+4. Pre-race chat room for logistics coordination
+5. Support for immediate and scheduled challenges
+6. Mutual confirmation required 1 hour before scheduled race
+7. Legal disclaimer acceptance before each challenge
+
+#### Result Verification:
+- Both participants must submit matching results within 2 hours
+- GPS tracking during active challenges (opt-in)
+- Spectators/group members can verify as witnesses
+- Photo/video evidence upload capability
+- Mismatched results trigger review process
+
+#### Dispute Handling:
+- Dispute flag with evidence submission (24-hour window)
+- Community moderation by trusted riders (reputation-based)
+- Admin arbitration for escalated cases
+- Result frozen during dispute
+- Strike system: 3 false dispute claims = challenge ban
+
+#### Anti-Cheating Measures:
+- Algorithmic anomaly detection for suspicious win patterns
+- 7-day cooldown between same-opponent challenges
+- Minimum account age/activity required for challenges
+- Device fingerprinting for multi-account detection
+- Report system for suspected cheating
+- Skill decay for inactive periods
+
+#### Race Types:
+- Time Trial
+- Meet & Cruise
+- Track Day
+- Explicitly discourage illegal street racing
+
+#### Database Tables:
+```
+challenges, challenge_results, challenge_disputes, dispute_evidence,
+challenge_witnesses, challenge_chats, user_challenge_stats,
+cheating_reports, user_strikes
+```
+
+---
+
+### 4. Matchmaking System
+
+#### Algorithm Formula:
+```
+MatchScore = (SkillMatch × 0.35) + (BikeMatch × 0.25) +
+             (ProximityScore × 0.20) + (AvailabilityScore × 0.10) +
+             (ReputationScore × 0.10)
+```
+
+#### Match Quality Tiers:
+- Excellent: > 0.85
+- Good: 0.70 - 0.85
+- Fair: 0.55 - 0.70
+
+#### Location Handling:
+- Default radius: 25km
+- Expandable to: 50km, 100km, 200km
+- "Willing to travel" user preference
+- Show estimated travel time, not just distance
+- Regional grouping for sparse areas
+
+#### Availability System:
+- "Online now" status indicator
+- Weekly availability schedule in profile
+- "Looking for challenge" toggle on home screen
+- Availability scoring:
+  - Online now: 1.0
+  - Online today: 0.7
+  - Schedule match: 0.5
+  - Offline: 0.0
+
+#### Cold Start (New Users):
+- Onboarding questionnaire: riding experience, race history, self-assessment
+- Start at "Intermediate" skill level
+- Mark as "Unranked" for first 10 challenges
+- Higher uncertainty factor in early matches
+- Optional: ride verification (license, club membership)
+
+#### Database Tables:
+```
+match_preferences, availability_schedules, skill_ratings,
+match_history, onboarding_responses
+```
+
+---
+
+### 5. Emergency Alert System (SOS)
+
+#### Escalation Tiers:
+| Tier | Time | Action |
+|------|------|--------|
+| 1 | 0-2 min | Alert nearby riders within 5km |
+| 2 | 2-5 min | Expand to 15km, alert groups and shops |
+| 3 | 5-10 min | Notify emergency contacts |
+| 4 | 10+ min | Prompt user to call emergency services |
+
+#### Emergency Types:
+- Accident/Crash (Critical - skip to Tier 3)
+- Breakdown (Moderate)
+- Medical (Critical)
+- Theft (Urgent)
+- Other
+
+#### False Alarm Handling:
+- First false alarm: Warning notification
+- Second: 24-hour SOS cooldown
+- Third: 7-day cooldown + admin review
+- Malicious abuse: Permanent feature ban
+- "Test SOS" button in settings (doesn't alert others)
+
+#### Location Requirements:
+- Minimum 50m GPS accuracy for SOS
+- If GPS unavailable: send last known location + "Approximate"
+- Manual location description entry option
+- Update location every 30 seconds during active SOS
+- Cache offline maps for common riding areas
+
+#### Alert Recipients:
+- SOS radius: 10km default, configurable 5-25km
+- "Trusted responders" list in safety settings
+- Priority: Trusted > Group members > Nearby riders > Shops
+- Allow opting out of SOS reception
+
+#### Medical Information:
+- Optional medical ID: blood type, allergies, conditions
+- Shared with confirmed responders only
+
+#### Database Tables:
+```
+sos_alerts, sos_responses, emergency_contacts, trusted_responders,
+medical_profiles, sos_escalation_logs, false_alarm_records
+```
+
+---
+
+### 6. Groups & Communities
+
+#### Group Types:
+- Public: Anyone can join
+- Private: Request to join, admin approval
+- Secret: Invite only, hidden from search
+
+#### Member Limits:
+- Free groups: Up to 100 members
+- Premium groups: Up to 500 members
+- Enterprise/Club: Unlimited (special arrangement)
+
+#### Admin Succession:
+- Require at least 2 admins for groups > 10 members
+- Admin inactive 60 days: prompt to transfer role
+- Admin inactive 90 days: auto-promote longest-tenured moderator
+- No admins remaining: promote most active member
+- Group orphaned 30 days: mark for archival
+
+#### Inactive Group Handling:
+- Inactive: No posts or events for 90 days
+- Warning notification at 60 days
+- Archive at 90 days (hide from search, keep data)
+- Archived groups can be revived by any member
+- Permanent deletion after 1 year archived
+
+#### Moderation Powers:
+| Role | Powers |
+|------|--------|
+| Admin | Delete posts, remove members, mute users, pin posts, manage roles |
+| Moderator | Delete posts, mute users (temporary) |
+| Member | Post, comment, report to platform admin |
+
+#### Features:
+- Group events/rides
+- Announcement channel
+- Member directory
+- Group chat
+- Photo albums
+- Subgroups (for large groups)
+
+#### Database Tables:
+```
+groups, group_members, group_roles, group_posts, group_events,
+group_chat_messages, group_photos, group_settings, group_invites
+```
+
+---
+
+### 7. Shop & Marketplace
+
+#### Business Verification:
+- Required: Business permit/license, government ID
+- Optional: DTI/SEC registration, BIR certificate
+- Manual admin review within 3-5 business days
+- "Pending verification" badge until approved
+- Limited functionality until verified
+- Annual re-verification requirement
+
+#### Listing Moderation:
+- Prohibited: Stolen goods, illegal modifications, counterfeit parts
+- Automated: Keyword filter, image scan
+- Community flagging system with admin review
+- 3-strike policy for violations
+
+#### Transaction Model (Phase 1 - MVP):
+- Listing/inquiry only (connect buyer-seller)
+- No in-app payments initially
+
+#### Transaction Model (Phase 2 - Future):
+- In-app transactions with payment gateway
+- Integration: PayMongo, GCash, Maya
+- Escrow for transactions over PHP 5,000
+- Buyer protection policy
+- Seller payout: T+3 after delivery confirmation
+
+#### Review System:
+- Reviews tied to verified interactions
+- 5-star rating with mandatory comment for < 3 stars
+- Business can respond publicly
+- Weight recent reviews higher
+- Display response rate and time
+
+#### Parts Request System:
+- User posts "Wanted" request with part details
+- Broadcast to relevant shops by category/location
+- Shops send quotes with price/availability
+- Request expires after 7 days
+
+#### Business Monetization:
+- Basic listing: Free (up to 20 items)
+- Featured listing: PHP 50-100/week per item
+- Top placement: PHP 200-500/week
+- Transaction fee (if enabled): 3-5% per sale
+
+#### Database Tables:
+```
+shops, shop_verifications, shop_documents, listings, listing_categories,
+listing_images, shop_reviews, parts_requests, parts_quotes,
+shop_subscriptions, transactions
+```
+
+---
+
+### 8. Freemium Subscription System
+
+#### Free Tier:
+- Basic profile and garage (up to 2 bikes)
+- Browse nearby riders (limited to 10/day)
+- Join up to 3 groups
+- Basic SOS feature
+- View shops and listings
+- Limited messaging (20 messages/day)
+- Basic match suggestions
+
+#### Premium Tier (PHP 199-299/month):
+- Unlimited bikes in garage
+- Unlimited rider discovery
+- Unlimited group membership
+- Advanced SOS with priority escalation
+- Boosted profile visibility
+- Unlimited messaging
+- Advanced matching with detailed analytics
+- Challenge statistics and history
+- Ad-free experience
+- Custom profile themes
+- Priority support
+
+#### Subscription Management:
+- Self-service cancellation in settings
+- Cancel takes effect at period end
+- Grace period: 7 days after expiration
+- Data preserved for 90 days after cancellation
+- Prorated upgrades only
+
+#### Payment Integration:
+- To be follow
+
+#### Database Tables:
+```
+subscriptions, subscription_plans, payment_methods,
+payment_transactions, subscription_features
+```
+
+---
+
+### 9. Notifications System
+
+#### Notification Channels:
+- In-app notifications
+- Email digests (daily/weekly)
+
+#### Notification Types:
+- Challenge invites/updates
+- Group activity
+- SOS alerts (critical, cannot disable)
+- Messages
+- Match suggestions
+- Shop promotions (opt-in)
+- System announcements
+
+#### User Controls:
+- Granular per-type settings
+- Do Not Disturb scheduling
+- Critical override for SOS
+
+#### Database Tables:
+```
+notifications, notification_preferences, notification_channels,
+push_tokens, email_preferences
+```
+
+---
+
+### 10. Data & Privacy
+
+#### Location Data:
+- Active SOS location: Retained 30 days, then deleted
+- Regular location: Real-time only, not stored
+- Aggregated/anonymized: Retained for analytics
+- User can clear location history
+
+#### GDPR Compliance:
+- Data export: JSON/CSV download of all user data
+- Account deletion: Complete removal within 30 days
+- Granular consent checkboxes at registration
+- Consent management dashboard
+- Cookie consent banner
+
+#### Third-Party Data Sharing:
+- Shops see: Name, bike info (if user initiates contact)
+- Never share: Precise location, contact info without consent
+- Analytics: Aggregated, anonymized only
+- No selling of personal data
+
+#### Database Tables:
+```
+user_consents, data_export_requests, account_deletion_requests,
+audit_logs, privacy_settings
+```
+
+---
+
+## API Structure
+
+### RESTful Endpoints:
+```
+/api/v1/auth/*           - Authentication
+/api/v1/users/*          - User management
+/api/v1/profiles/*       - User profiles
+/api/v1/bikes/*          - Garage management
+/api/v1/challenges/*     - Challenge system
+/api/v1/matches/*        - Matchmaking
+/api/v1/sos/*            - Emergency alerts
+/api/v1/groups/*         - Groups & communities
+/api/v1/shops/*          - Marketplace
+/api/v1/listings/*       - Shop listings
+/api/v1/subscriptions/*  - Subscriptions
+/api/v1/notifications/*  - Notifications
+```
+
+### WebSocket Events:
+```
+challenge.created, challenge.accepted, challenge.result
+sos.triggered, sos.response, sos.escalated
+message.received, message.read
+user.online, user.offline
+group.activity
+```
+
+---
+
+## Security Requirements
+
+- HTTPS everywhere
+- CSRF protection on all forms
+- XSS prevention (sanitize all user input)
+- SQL injection prevention (use Eloquent ORM)
+- Rate limiting on all endpoints
+- Input validation using Laravel Form Requests
+- File upload validation (type, size, malware scan)
+- Audit logging for sensitive operations
+- Regular security audits
+
+---
+
+## Development Guidelines
+
+1. Follow Laravel best practices and conventions
+2. Use TypeScript for React components
+3. Implement proper error handling and logging
+4. Write unit and feature tests (80%+ coverage)
+5. Use database migrations and seeders
+6. Document all API endpoints with OpenAPI/Swagger
+7. Implement proper Git workflow (feature branches, PRs)
+8. Use environment variables for configuration
+9. Implement proper logging with Laravel Log
+10. Follow accessibility standards (WCAG 2.1 AA)
+
+---
+
+## Initial Languages:
+- English (primary)
+- Filipino/Tagalog
+
+---
+
+## MVP Scope (Phase 1)
+
+Focus on these core features for initial launch:
+1. User registration and authentication
+2. User profiles and garage
+3. Basic matchmaking
+4. Challenge system (without GPS tracking)
+5. Basic groups
+6. SOS alert system
+7. Shop listings (no transactions)
+8. Basic notifications
+
+---
+
+## Post-MVP Features (Phase 2+)
+
+1. In-app payments and transactions
+2. Advanced GPS tracking for challenges
+3. Video chat for pre-race coordination
+4. AI-powered match suggestions
+5. Gamification (badges, achievements)
+6. Event ticketing
+7. Insurance partnerships
+8. Track day bookings
