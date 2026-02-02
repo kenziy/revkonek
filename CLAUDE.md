@@ -22,7 +22,7 @@ php artisan test --filter=TestName  # Run specific test
 
 # Frontend only
 npm run dev      # Vite dev server with HMR
-npm run build    # Production build
+npm run build    # TypeScript check + production build
 
 # Database
 php artisan migrate
@@ -51,7 +51,7 @@ php artisan migrate:fresh --seed    # Reset and seed
 - **resources/js/Components/** - Reusable components (Form/, UI/ subdirectories)
 - **resources/js/Layouts/** - Layout components (AuthenticatedLayout, GuestLayout, MobileLayout)
 - **resources/js/types/** - TypeScript type definitions
-- Path alias: `@/*` maps to `resources/js/*`
+- Path aliases: `@/*` → `resources/js/*`, `ziggy-js` → Ziggy routing types
 
 ### Key Patterns
 

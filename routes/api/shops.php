@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\Api\V1\Shops\ShopController;
-use App\Http\Controllers\Api\V1\Shops\ShopVerificationController;
-use App\Http\Controllers\Api\V1\Shops\ShopReviewController;
 use App\Http\Controllers\Api\V1\Shops\PartsRequestController;
+use App\Http\Controllers\Api\V1\Shops\ShopController;
+use App\Http\Controllers\Api\V1\Shops\ShopReviewController;
+use App\Http\Controllers\Api\V1\Shops\ShopVerificationController;
 use Illuminate\Support\Facades\Route;
 
 // Shops discovery

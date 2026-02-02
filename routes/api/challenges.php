@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\Api\V1\Challenges\ChallengeController;
-use App\Http\Controllers\Api\V1\Challenges\ChallengeResultController;
-use App\Http\Controllers\Api\V1\Challenges\ChallengeDisputeController;
 use App\Http\Controllers\Api\V1\Challenges\ChallengeChatController;
+use App\Http\Controllers\Api\V1\Challenges\ChallengeController;
+use App\Http\Controllers\Api\V1\Challenges\ChallengeDisputeController;
+use App\Http\Controllers\Api\V1\Challenges\ChallengeResultController;
 use App\Http\Controllers\Api\V1\Challenges\ChallengeWitnessController;
 use Illuminate\Support\Facades\Route;
 

@@ -14,7 +14,7 @@ import {
     Bars3Icon,
     XMarkIcon,
     UserIcon,
-    WrenchScrewdriverIcon,
+    TruckIcon,
     ShieldExclamationIcon,
     MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
@@ -40,7 +40,7 @@ export default function Authenticated({
         { name: 'Match', href: route('match.index'), icon: MagnifyingGlassIcon },
         { name: 'Challenges', href: route('challenges.index'), icon: BoltIcon },
         { name: 'Groups', href: route('groups.index'), icon: UserGroupIcon },
-        { name: 'Garage', href: route('garage.index'), icon: WrenchScrewdriverIcon },
+        { name: 'Vehicles', href: route('vehicles.index'), icon: TruckIcon },
         { name: 'Shop', href: route('shop.index'), icon: ShoppingBagIcon },
         { name: 'SOS', href: route('sos.index'), icon: ShieldExclamationIcon },
     ];

@@ -1,11 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Groups\GroupChatController;
 use App\Http\Controllers\Api\V1\Groups\GroupController;
+use App\Http\Controllers\Api\V1\Groups\GroupEventController;
+use App\Http\Controllers\Api\V1\Groups\GroupInviteController;
 use App\Http\Controllers\Api\V1\Groups\GroupMemberController;
 use App\Http\Controllers\Api\V1\Groups\GroupPostController;
-use App\Http\Controllers\Api\V1\Groups\GroupEventController;
-use App\Http\Controllers\Api\V1\Groups\GroupChatController;
-use App\Http\Controllers\Api\V1\Groups\GroupInviteController;
 use Illuminate\Support\Facades\Route;
 
 // Groups CRUD

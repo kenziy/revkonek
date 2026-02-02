@@ -14,6 +14,9 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             SubscriptionPlanSeeder::class,
             ListingCategorySeeder::class,
+            VehicleTypeSeeder::class,
+            VehicleCategorySeeder::class,
+            SystemSettingsSeeder::class,
         ]);
 
         // Create test admin user
@@ -28,8 +31,8 @@ class DatabaseSeeder extends Seeder
         // Create test regular user
         $user = User::factory()->create([
             'name' => 'Test Rider',
-            'email' => 'rider@revkonek.com',
-            'username' => 'testrider',
+            'email' => 'test@test.com',
+            'username' => 'test',
         ]);
         $user->assignRole('user');
     }

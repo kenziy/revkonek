@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Matches\AvailabilityController;
 use App\Http\Controllers\Api\V1\Matches\MatchController;
 use App\Http\Controllers\Api\V1\Matches\MatchPreferenceController;
-use App\Http\Controllers\Api\V1\Matches\AvailabilityController;
 use Illuminate\Support\Facades\Route;
 
 // Match suggestions

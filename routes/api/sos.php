@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\Api\V1\Sos\SosAlertController;
-use App\Http\Controllers\Api\V1\Sos\SosResponseController;
 use App\Http\Controllers\Api\V1\Sos\EmergencyContactController;
 use App\Http\Controllers\Api\V1\Sos\MedicalProfileController;
+use App\Http\Controllers\Api\V1\Sos\SosAlertController;
+use App\Http\Controllers\Api\V1\Sos\SosResponseController;
 use App\Http\Controllers\Api\V1\Sos\TrustedResponderController;
 use Illuminate\Support\Facades\Route;
 

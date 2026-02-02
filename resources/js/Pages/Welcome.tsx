@@ -261,7 +261,7 @@ export default function Welcome({ auth }: PageProps) {
                             Join the fastest-growing rider community
                         </div>
 
-                        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
+                        <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white mb-6 tracking-tight font-racing uppercase">
                             <span className="block">Connect.</span>
                             <span className="block text-gradient bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">Ride.</span>
                             <span className="block">Compete.</span>

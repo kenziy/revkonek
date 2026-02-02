@@ -3,34 +3,30 @@
 namespace App\Models;
 
 use App\Enums\SubscriptionTier;
-use App\Models\Profile\UserProfile;
-use App\Models\Profile\UserPrivacySetting;
-use App\Models\Profile\Bike;
-use App\Models\Auth\SocialAccount;
-use App\Models\Auth\TwoFactorCode;
 use App\Models\Auth\RecoveryCode;
+use App\Models\Auth\SocialAccount;
 use App\Models\Challenge\Challenge;
 use App\Models\Challenge\UserChallengeStats;
 use App\Models\Group\Group;
-use App\Models\Group\GroupMember;
+use App\Models\Match\AvailabilitySchedule;
+use App\Models\Match\MatchPreference;
+use App\Models\Profile\UserPrivacySetting;
+use App\Models\Profile\UserProfile;
 use App\Models\Shop\Shop;
 use App\Models\Sos\EmergencyContact;
 use App\Models\Sos\MedicalProfile;
 use App\Models\Sos\TrustedResponder;
 use App\Models\Subscription\Subscription;
-use App\Models\Match\MatchPreference;
-use App\Models\Match\AvailabilitySchedule;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
@@ -42,6 +38,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',
         'date_of_birth',
         'is_active',
+        'is_looking_for_match',
         'last_login_at',
         'two_factor_enabled',
         'two_factor_secret',
@@ -61,6 +58,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'date_of_birth' => 'date',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'is_looking_for_match' => 'boolean',
             'last_login_at' => 'datetime',
             'two_factor_enabled' => 'boolean',
         ];
@@ -77,7 +75,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(UserPrivacySetting::class);
     }
 
-    // Garage/Bikes
+    // Garage/Bikes (legacy)
     public function bikes(): HasMany
     {
         return $this->hasMany(Bike::class);
@@ -86,6 +84,22 @@ class User extends Authenticatable implements MustVerifyEmail
     public function activeBike(): HasOne
     {
         return $this->hasOne(Bike::class)->where('is_active', true);
+    }
+
+    // Vehicles (new unified system)
+    public function vehicles(): HasMany
+    {
+        return $this->hasMany(Vehicle::class);
+    }
+
+    public function activeVehicle(): HasOne
+    {
+        return $this->hasOne(Vehicle::class)->where('is_active', true);
+    }
+
+    public function vehiclesAvailableForMatch(): HasMany
+    {
+        return $this->hasMany(Vehicle::class)->where('is_available_for_match', true);
     }
 
     // Auth Relations

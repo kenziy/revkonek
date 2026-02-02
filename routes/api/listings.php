@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\V1\Listings\ListingController;
 use App\Http\Controllers\Api\V1\Listings\ListingCategoryController;
+use App\Http\Controllers\Api\V1\Listings\ListingController;
 use App\Http\Controllers\Api\V1\Listings\ListingInquiryController;
 use Illuminate\Support\Facades\Route;
 

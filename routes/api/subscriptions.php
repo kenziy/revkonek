@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\V1\Subscriptions\SubscriptionController;
 use App\Http\Controllers\Api\V1\Subscriptions\PlanController;
+use App\Http\Controllers\Api\V1\Subscriptions\SubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 // Plans

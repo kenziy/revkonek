@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\Api\V1\Users\UserController;
 use App\Http\Controllers\Api\V1\Users\BlockController;
 use App\Http\Controllers\Api\V1\Users\ConnectionController;
+use App\Http\Controllers\Api\V1\Users\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/me', [UserController::class, 'me']);
