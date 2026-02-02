@@ -237,11 +237,10 @@ export default function Welcome({ auth }: PageProps) {
                     <div className="absolute inset-0 scale-150">
                         <iframe
                             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200vw] h-[200vh] min-w-[200vw] min-h-[200vh] pointer-events-none"
-                            src="https://www.youtube.com/embed/rgyh4BzFxrk?autoplay=1&mute=1&loop=1&playlist=rgyh4BzFxrk&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=*"
+                            src="https://www.youtube.com/embed/rgyh4BzFxrk?autoplay=1&mute=1&loop=1&playlist=rgyh4BzFxrk&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
                             title="Background Video"
-                            frameBorder="0"
                             allow="autoplay; encrypted-media"
-                            allowFullScreen
+                            referrerPolicy="no-referrer-when-downgrade"
                         />
                     </div>
                     {/* Dark overlay for readability */}
