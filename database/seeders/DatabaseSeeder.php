@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Club\ClubSubscriptionSetting;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -35,5 +36,18 @@ class DatabaseSeeder extends Seeder
             'username' => 'test',
         ]);
         $user->assignRole('user');
+
+        // Default club subscription pricing
+        ClubSubscriptionSetting::firstOrCreate(
+            [],
+            [
+                'yearly_price' => 999.00,
+                'currency' => 'PHP',
+                'description' => 'Unlock all Pro features for your club for 1 year.',
+                'is_active' => true,
+            ],
+        );
+
+        $this->call(ClubSeeder::class);
     }
 }

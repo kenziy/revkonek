@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import { PropsWithChildren } from 'react';
 import clsx from 'clsx';
 import ThemeToggle from '@/Components/UI/ThemeToggle';
+import { Footer } from '@/Components/UI';
 
 export default function Guest({ children }: PropsWithChildren) {
     return (
@@ -12,7 +13,7 @@ export default function Guest({ children }: PropsWithChildren) {
                 'dark:from-secondary-950 dark:via-secondary-900 dark:to-primary-950'
             )}
         >
-            <div className="absolute top-4 right-4">
+            <div className="absolute top-4 right-4 z-10">
                 <ThemeToggle />
             </div>
 
@@ -31,7 +32,7 @@ export default function Guest({ children }: PropsWithChildren) {
                         </Link>
                         <h1 className="text-2xl font-bold text-white">REV KONEK</h1>
                         <p className="text-secondary-400 text-sm mt-1">
-                            Connect. Compete. Conquer.
+                            Connect. Ride. Share.
                         </p>
                     </div>
 
@@ -64,6 +65,8 @@ export default function Guest({ children }: PropsWithChildren) {
                     </p>
                 </div>
             </div>
+
+            <Footer className="relative z-10" />
         </div>
     );
 }

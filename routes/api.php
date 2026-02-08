@@ -26,17 +26,11 @@ Route::prefix('v1')->group(function () {
         // Bikes/Garage
         Route::prefix('bikes')->group(base_path('routes/api/bikes.php'));
 
-        // Challenges
-        Route::prefix('challenges')->group(base_path('routes/api/challenges.php'));
-
-        // Matchmaking
-        Route::prefix('matches')->group(base_path('routes/api/matches.php'));
-
         // SOS/Emergency
         Route::prefix('sos')->group(base_path('routes/api/sos.php'));
 
-        // Groups
-        Route::prefix('groups')->group(base_path('routes/api/groups.php'));
+        // Clubs
+        Route::prefix('clubs')->group(base_path('routes/api/clubs.php'));
 
         // Shops
         Route::prefix('shops')->group(base_path('routes/api/shops.php'));

@@ -25,8 +25,9 @@ class StoreVehicleRequest extends FormRequest
             'plate_number' => ['nullable', 'string', 'max:20'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'is_active' => ['boolean'],
-            'is_available_for_match' => ['boolean'],
             'photo' => ['nullable', 'image', 'max:5120'],
+            'photos' => ['nullable', 'array', 'max:'.$this->user()->getSubscriptionTier()->maxVehiclePhotos()],
+            'photos.*' => ['image', 'max:5120'],
         ];
 
         // Bike-specific validation

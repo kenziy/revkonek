@@ -26,8 +26,34 @@ export interface CarDetails {
     doors?: number;
 }
 
+export type VehicleLayoutTemplate = 'classic' | 'showcase' | 'spec_sheet';
+export type BackgroundStyle = 'default' | 'gradient' | 'dark' | 'light';
+export type ModCategory = 'engine' | 'suspension' | 'exhaust' | 'brakes' | 'cosmetic' | 'wheels' | 'electronics' | 'other';
+export type SocialPlatform = 'youtube' | 'instagram' | 'tiktok' | 'facebook' | 'twitter' | 'website';
+
+export interface VehicleMod {
+    id: number;
+    category: ModCategory;
+    categoryLabel: string;
+    name: string;
+    brand?: string;
+    description?: string;
+    price?: string;
+    currency: string;
+    installedAt?: string;
+}
+
+export interface VehicleSocialLink {
+    id: number;
+    platform: SocialPlatform;
+    platformLabel: string;
+    url: string;
+    label?: string;
+}
+
 export interface Vehicle {
     id: number;
+    uuid: string;
     vehicleType: {
         slug: 'bike' | 'car';
         name: string;
@@ -46,15 +72,32 @@ export interface Vehicle {
     plateNumber?: string;
     notes?: string;
     isActive: boolean;
-    isAvailableForMatch: boolean;
     photo?: string;
     photos?: VehiclePhoto[];
     bikeDetails?: BikeDetails;
     carDetails?: CarDetails;
     owner?: {
         id: number;
+        uuid: string;
         name: string;
+        displayName: string;
+        username?: string;
+        avatar?: string;
+        isPremium: boolean;
     };
+    ownerIsPremium?: boolean;
+    // Pro fields
+    story?: string;
+    layoutTemplate?: VehicleLayoutTemplate;
+    accentColor?: string;
+    backgroundStyle?: BackgroundStyle;
+    coverImage?: string;
+    youtubeVideoId?: string;
+    youtubeAutoplay?: boolean;
+    mods?: VehicleMod[];
+    socialLinks?: VehicleSocialLink[];
+    likesCount?: number;
+    isLiked?: boolean;
 }
 
 export interface VehiclePhoto {
@@ -65,6 +108,7 @@ export interface VehiclePhoto {
 
 export interface VehicleForEdit {
     id: number;
+    uuid: string;
     vehicleTypeId: number;
     vehicleCategoryId?: number;
     vehicleType: {
@@ -79,41 +123,23 @@ export interface VehicleForEdit {
     plateNumber?: string;
     notes?: string;
     isActive: boolean;
-    isAvailableForMatch: boolean;
     photo?: string;
+    photos?: VehiclePhoto[];
     cc?: number;
     engineLiters?: number;
     horsepower?: number;
     transmission?: string;
     drivetrain?: string;
     doors?: number;
+    // Pro fields
+    layoutTemplate?: VehicleLayoutTemplate;
+    accentColor?: string;
+    backgroundStyle?: BackgroundStyle;
+    story?: string;
+    coverImage?: string;
+    youtubeUrl?: string;
+    youtubeAutoplay?: boolean;
+    mods?: VehicleMod[];
+    socialLinks?: VehicleSocialLink[];
 }
 
-export interface MatchVehicle {
-    id: number;
-    vehicleType: string;
-    vehicleTypeName: string;
-    displayName: string;
-    category?: string;
-    categorySlug?: string;
-    engineSpec?: string;
-    modificationLevel?: string;
-    isAvailableForMatch: boolean;
-    photo?: string;
-    owner: {
-        id: number;
-        name: string;
-        rating: number;
-        wins: number;
-    };
-    distance: string;
-}
-
-export interface MyVehicle {
-    id: number;
-    displayName: string;
-    vehicleType: string;
-    engineSpec?: string;
-    isAvailableForMatch: boolean;
-    photo?: string;
-}

@@ -13,7 +13,7 @@ interface StatCardProps {
         value: number;
         type: 'increase' | 'decrease';
     };
-    variant?: 'default' | 'primary' | 'success' | 'warning';
+    variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger';
     className?: string;
 }
 
@@ -30,6 +30,7 @@ export default function StatCard({
         primary: 'bg-gradient-to-br from-primary-600 to-primary-700 text-white',
         success: 'bg-gradient-to-br from-success-600 to-success-700 text-white',
         warning: 'bg-gradient-to-br from-accent-500 to-accent-600 text-white',
+        danger: 'bg-gradient-to-br from-danger-500 to-danger-600 text-white',
     };
 
     const iconBgClasses = {
@@ -37,6 +38,7 @@ export default function StatCard({
         primary: 'bg-white/20 text-white',
         success: 'bg-white/20 text-white',
         warning: 'bg-white/20 text-white',
+        danger: 'bg-white/20 text-white',
     };
 
     const titleClasses = {
@@ -44,6 +46,7 @@ export default function StatCard({
         primary: 'text-white/80',
         success: 'text-white/80',
         warning: 'text-white/80',
+        danger: 'text-white/80',
     };
 
     const valueClasses = {
@@ -51,6 +54,7 @@ export default function StatCard({
         primary: 'text-white',
         success: 'text-white',
         warning: 'text-white',
+        danger: 'text-white',
     };
 
     return (

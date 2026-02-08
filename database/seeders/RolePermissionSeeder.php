@@ -20,11 +20,6 @@ class RolePermissionSeeder extends Seeder
             'ban-users',
             'verify-users',
 
-            // Challenge moderation
-            'resolve-disputes',
-            'issue-strikes',
-            'view-challenge-reports',
-
             // Group moderation
             'moderate-groups',
             'archive-groups',
@@ -55,11 +50,9 @@ class RolePermissionSeeder extends Seeder
 
         $moderator = Role::create(['name' => 'moderator']);
         $moderator->givePermissionTo([
-            'resolve-disputes',
             'moderate-content',
             'delete-content',
             'moderate-groups',
-            'view-challenge-reports',
         ]);
 
         $shopAdmin = Role::create(['name' => 'shop-admin']);
@@ -67,13 +60,6 @@ class RolePermissionSeeder extends Seeder
             'verify-shops',
             'manage-listings',
             'view-shop-documents',
-        ]);
-
-        // Trusted rider (community moderator for challenges)
-        $trustedRider = Role::create(['name' => 'trusted-rider']);
-        $trustedRider->givePermissionTo([
-            'resolve-disputes',
-            'view-challenge-reports',
         ]);
 
         // Regular user role (no special permissions)

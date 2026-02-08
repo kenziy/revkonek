@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -29,10 +30,26 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user ? array_merge($user->toArray(), [
+                    'avatar' => $user->profile?->avatar,
+                ]) : null,
+                'is_admin' => $user?->can('access-admin-panel') ?? false,
+                'is_premium' => $user?->isPremium() ?? false,
+                'subscription_tier' => $user?->getSubscriptionTier()->value ?? 'free',
+                'roles' => $user?->getRoleNames()->toArray() ?? [],
+                'permissions' => $user?->getAllPermissions()->pluck('name')->toArray() ?? [],
+            ],
+            'features' => [
+                'sos' => SystemSetting::get('features.sos_enabled', true),
+            ],
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
             ],
         ];
     }

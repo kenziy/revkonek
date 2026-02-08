@@ -13,3 +13,5 @@ export { default as FloatingActionButton } from './FloatingActionButton';
 export { default as StatCard } from './StatCard';
 export { default as ListItem } from './ListItem';
 export { default as ProgressBar } from './ProgressBar';
+export { default as ProBadge } from './ProBadge';
+export { default as Footer } from './Footer';

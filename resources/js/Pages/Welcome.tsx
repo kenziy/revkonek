@@ -1,13 +1,26 @@
 import { PageProps } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
+import { Footer } from '@/Components/UI';
 
-function SpeedometerIcon({ className }: { className?: string }) {
+function GarageIcon({ className }: { className?: string }) {
     return (
         <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor"/>
-            <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            <circle cx="12" cy="12" r="2" fill="currentColor"/>
+            <path d="M19 10V20H5V10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M21 8L12 3L3 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M9 14h6v6H9v-6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+    );
+}
+
+function FeedIcon({ className }: { className?: string }) {
+    return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2"/>
+            <path d="M3 9h18" stroke="currentColor" strokeWidth="2"/>
+            <path d="M9 9v12" stroke="currentColor" strokeWidth="2"/>
+            <path d="M13 13h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            <path d="M13 17h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
         </svg>
     );
 }
@@ -20,15 +33,6 @@ function MotorcycleIcon({ className }: { className?: string }) {
             <path d="M5.5 17.5h3l2-5h4l1.5 2.5h2.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M10.5 12.5l1-3h3l1 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M14.5 9.5l2-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        </svg>
-    );
-}
-
-function FlagIcon({ className }: { className?: string }) {
-    return (
-        <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1v12z" fill="currentColor"/>
-            <path d="M4 22v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
         </svg>
     );
 }
@@ -90,23 +94,29 @@ function ChevronDownIcon({ className }: { className?: string }) {
 
 const stats = [
     { value: '10K+', label: 'Active Riders' },
-    { value: '500+', label: 'Challenges Completed' },
+    { value: '200+', label: 'Clubs & Crews' },
     { value: '50+', label: 'Cities Connected' },
     { value: '24/7', label: 'SOS Support' },
 ];
 
 const features = [
     {
-        icon: FlagIcon,
-        title: 'Challenge Mode',
-        description: 'Race against other riders, submit results with proof, and climb the leaderboards. Dispute system ensures fair play.',
+        icon: UsersIcon,
+        title: 'Rider Clubs',
+        description: 'Create or join clubs, organize group rides and events, chat with members, and build your riding crew.',
+        color: 'from-accent-500 to-accent-600',
+    },
+    {
+        icon: GarageIcon,
+        title: 'Vehicle Showcase',
+        description: 'Show off your ride with photos, mods, and specs. Get likes from the community and explore other builds.',
         color: 'from-primary-500 to-primary-600',
     },
     {
-        icon: UsersIcon,
-        title: 'Group Rides',
-        description: 'Join or create riding groups, plan epic routes together, and share the thrill with fellow enthusiasts.',
-        color: 'from-accent-500 to-accent-600',
+        icon: FeedIcon,
+        title: 'Community Feed',
+        description: 'Stay updated with club posts, vehicle spotlights, and upcoming events from riders you follow.',
+        color: 'from-blue-500 to-blue-600',
     },
     {
         icon: AlertIcon,
@@ -122,23 +132,17 @@ const features = [
     },
     {
         icon: HeartIcon,
-        title: 'Rider Matchmaking',
-        description: 'Find your perfect riding buddy based on skill level, bike type, and riding schedule. Never ride alone.',
+        title: 'Follow & Connect',
+        description: 'Follow your favorite riders and clubs. Like vehicles, discover builds, and grow your riding network.',
         color: 'from-pink-500 to-pink-600',
-    },
-    {
-        icon: SpeedometerIcon,
-        title: 'Stats & Rankings',
-        description: 'Track your performance, view detailed statistics, and see how you stack up against the competition.',
-        color: 'from-blue-500 to-blue-600',
     },
 ];
 
 const testimonials = [
     {
-        quote: "Finally, an app that gets what riders need. The challenge system is addictive!",
+        quote: "Our club went from a group chat to a proper crew overnight. Events, posts, and even a photo gallery — all in one place.",
         author: "Marco D.",
-        role: "Weekend Warrior",
+        role: "Club President",
         avatar: "M",
     },
     {
@@ -148,9 +152,9 @@ const testimonials = [
         avatar: "R",
     },
     {
-        quote: "Found my dream exhaust on the marketplace for half the price. Legit sellers only!",
+        quote: "I love the vehicle showcase — got tons of likes on my build and found inspiration from other riders' mods.",
         author: "Jay T.",
-        role: "Modifier",
+        role: "Build Enthusiast",
         avatar: "J",
     },
 ];
@@ -176,7 +180,7 @@ export default function Welcome({ auth }: PageProps) {
 
     return (
         <>
-            <Head title="REV KONEK - Connect. Ride. Compete." />
+            <Head title="REV KONEK - Connect. Ride. Share." />
 
             {/* Navigation */}
             <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -263,11 +267,11 @@ export default function Welcome({ auth }: PageProps) {
                         <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white mb-6 tracking-tight font-racing uppercase">
                             <span className="block">Connect.</span>
                             <span className="block text-gradient bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">Ride.</span>
-                            <span className="block">Compete.</span>
+                            <span className="block">Share.</span>
                         </h1>
 
                         <p className="text-lg sm:text-xl text-secondary-300 max-w-2xl mx-auto mb-10">
-                            The ultimate platform for motorcycle enthusiasts. Challenge riders, join group rides,
+                            The ultimate platform for motorcycle enthusiasts. Join clubs, showcase your build,
                             stay safe with SOS, and trade gear — all in one place.
                         </p>
 
@@ -351,99 +355,6 @@ export default function Welcome({ auth }: PageProps) {
                                 </p>
                             </div>
                         ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Challenge CTA Section */}
-            <section className="py-24 bg-gradient-to-br from-primary-600 to-primary-700 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute inset-0" style={{
-                        backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 50px, white 50px, white 52px)',
-                    }} />
-                </div>
-
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        <div>
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 text-white/90 text-sm font-medium mb-6">
-                                <FlagIcon className="w-4 h-4" />
-                                Challenge Mode
-                            </div>
-                            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-                                Ready to Prove You're the Fastest?
-                            </h2>
-                            <p className="text-lg text-white/80 mb-8">
-                                Challenge other riders to races, submit your times with video proof,
-                                and climb the leaderboards. Our dispute system ensures every race is fair.
-                                May the best rider win!
-                            </p>
-                            <div className="flex flex-wrap gap-4">
-                                <div className="flex items-center gap-2 text-white/90">
-                                    <ShieldIcon className="w-5 h-5" />
-                                    <span>Verified Results</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-white/90">
-                                    <UsersIcon className="w-5 h-5" />
-                                    <span>Witness System</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-white/90">
-                                    <SpeedometerIcon className="w-5 h-5" />
-                                    <span>Live Rankings</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="relative">
-                            <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
-                                <div className="flex items-center gap-4 mb-6">
-                                    <div className="w-12 h-12 rounded-full bg-accent-400 flex items-center justify-center text-xl font-bold text-secondary-900">
-                                        1
-                                    </div>
-                                    <div className="flex-1 h-1 bg-white/20 rounded-full">
-                                        <div className="h-full w-3/4 bg-accent-400 rounded-full" />
-                                    </div>
-                                    <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-xl font-bold text-white">
-                                        2
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between p-4 rounded-xl bg-white/10">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-accent-400 flex items-center justify-center font-bold text-secondary-900">
-                                                M
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold text-white">Marco D.</div>
-                                                <div className="text-sm text-white/60">Yamaha R15</div>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="font-bold text-accent-400">1:23.45</div>
-                                            <div className="text-xs text-white/60">Best Time</div>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center justify-between p-4 rounded-xl bg-white/5">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-secondary-500 flex items-center justify-center font-bold text-white">
-                                                J
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold text-white">Jay T.</div>
-                                                <div className="text-sm text-white/60">Honda CBR</div>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="font-bold text-white">1:25.12</div>
-                                            <div className="text-xs text-white/60">Best Time</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="mt-6 pt-6 border-t border-white/10 text-center text-white/60 text-sm">
-                                    Challenge ends in 2h 34m
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </section>
@@ -586,7 +497,7 @@ export default function Welcome({ auth }: PageProps) {
                         Ready to Join the Ride?
                     </h2>
                     <p className="text-xl text-secondary-300 mb-10 max-w-2xl mx-auto">
-                        Connect with riders near you, challenge the best, and become part of the
+                        Connect with riders near you, join a club, showcase your ride, and become part of the
                         Philippines' most exciting motorcycle community.
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -606,30 +517,7 @@ export default function Welcome({ auth }: PageProps) {
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="py-12 bg-secondary-950 border-t border-secondary-800">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
-                                <MotorcycleIcon className="w-5 h-5 text-white" />
-                            </div>
-                            <span className="font-bold text-white">REV KONEK</span>
-                        </div>
-
-                        <div className="flex items-center gap-6 text-sm text-secondary-400">
-                            <a href="#" className="hover:text-white transition-colors">About</a>
-                            <a href="#" className="hover:text-white transition-colors">Features</a>
-                            <a href="#" className="hover:text-white transition-colors">Safety</a>
-                            <a href="#" className="hover:text-white transition-colors">Contact</a>
-                        </div>
-
-                        <div className="text-sm text-secondary-500">
-                            &copy; {new Date().getFullYear()} REV KONEK. All rights reserved.
-                        </div>
-                    </div>
-                </div>
-            </footer>
+            <Footer />
         </>
     );
 }

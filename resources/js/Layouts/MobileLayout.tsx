@@ -13,7 +13,6 @@ interface MobileLayoutProps extends PropsWithChildren {
     rightActions?: ReactNode;
     transparentHeader?: boolean;
     className?: string;
-    onChallengeClick?: () => void;
 }
 
 export default function MobileLayout({
@@ -26,7 +25,6 @@ export default function MobileLayout({
     rightActions,
     transparentHeader = false,
     className,
-    onChallengeClick,
 }: MobileLayoutProps) {
     const { auth } = usePage().props as any;
     const user = auth?.user;
@@ -64,7 +62,6 @@ export default function MobileLayout({
             {showBottomNav && (
                 <BottomNav
                     currentRoute={route().current() || ''}
-                    onChallengeClick={onChallengeClick}
                 />
             )}
         </div>

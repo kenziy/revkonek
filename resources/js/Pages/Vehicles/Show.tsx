@@ -1,44 +1,56 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { Card, Badge } from '@/Components/UI';
+import { Card, Badge, Avatar, ProBadge } from '@/Components/UI';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import DangerButton from '@/Components/DangerButton';
-import { PencilIcon, TrashIcon, StarIcon, TruckIcon, BoltIcon } from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import clsx from 'clsx';
+import {
+    PencilIcon,
+    TrashIcon,
+    StarIcon,
+    TruckIcon,
+    WrenchScrewdriverIcon,
+    SwatchIcon,
+    CalendarDaysIcon,
+    TagIcon,
+    SparklesIcon,
+} from '@heroicons/react/24/outline';
+import { HeartIcon as HeartIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import { HeartIcon as HeartIconOutline } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import Modal from '@/Components/Modal';
+import { getTemplate } from '@/Components/Vehicles/Templates';
 import type { Vehicle } from '@/types/vehicle';
 
 interface VehiclesShowProps {
     vehicle?: Vehicle;
     isOwner: boolean;
+    ownerIsPremium?: boolean;
+    isLiked?: boolean;
+    likesCount?: number;
 }
 
-const modLevelLabels: Record<string, string> = {
-    stock: 'Stock',
-    mild: 'Mild',
-    built: 'Built',
-};
-
-export default function VehiclesShow({ vehicle, isOwner }: VehiclesShowProps) {
+export default function VehiclesShow({ vehicle, isOwner, ownerIsPremium = false, isLiked = false, likesCount = 0 }: VehiclesShowProps) {
     const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+    const handleToggleLike = () => {
+        if (vehicle) {
+            router.post(route('vehicles.toggleLike', vehicle.uuid), {}, {
+                preserveScroll: true,
+            });
+        }
+    };
 
     const handleDelete = () => {
         if (vehicle) {
-            router.delete(route('vehicles.destroy', vehicle.id));
+            router.delete(route('vehicles.destroy', vehicle.uuid));
         }
     };
 
     const handleSetActive = () => {
         if (vehicle) {
-            router.post(route('vehicles.setActive', vehicle.id));
-        }
-    };
-
-    const handleToggleMatch = () => {
-        if (vehicle) {
-            router.post(route('vehicles.toggleMatch', vehicle.id));
+            router.post(route('vehicles.setActive', vehicle.uuid));
         }
     };
 
@@ -62,219 +74,160 @@ export default function VehiclesShow({ vehicle, isOwner }: VehiclesShowProps) {
         );
     }
 
+    // Select layout template — only premium owners get non-Classic templates
+    const TemplateComponent = ownerIsPremium
+        ? getTemplate(vehicle.layoutTemplate)
+        : getTemplate('classic');
+
+    const accentStyle = ownerIsPremium && vehicle.accentColor
+        ? { '--vehicle-accent': vehicle.accentColor } as React.CSSProperties
+        : undefined;
+
+    // Collect quick specs for the info bar
+    const quickSpecs: { icon: React.ReactNode; label: string }[] = [];
+    if (vehicle.year) {
+        quickSpecs.push({ icon: <CalendarDaysIcon className="h-4 w-4" />, label: String(vehicle.year) });
+    }
+    if (vehicle.engineSpec) {
+        quickSpecs.push({ icon: <TruckIcon className="h-4 w-4" />, label: vehicle.engineSpec });
+    }
+    if (vehicle.color) {
+        quickSpecs.push({ icon: <SwatchIcon className="h-4 w-4" />, label: vehicle.color });
+    }
+    if (vehicle.modificationLevel && vehicle.modificationLevel !== 'stock') {
+        quickSpecs.push({ icon: <WrenchScrewdriverIcon className="h-4 w-4" />, label: vehicle.modificationLevel });
+    }
+    if (vehicle.category) {
+        quickSpecs.push({ icon: <TagIcon className="h-4 w-4" />, label: vehicle.category.name });
+    }
+
     return (
         <AuthenticatedLayout header={vehicle.displayName}>
             <Head title={vehicle.displayName} />
 
-            <div className="max-w-4xl mx-auto space-y-6">
-                {/* Photo Section */}
-                <Card padding="none" className="overflow-hidden">
-                    <div className="aspect-video bg-secondary-100 dark:bg-secondary-800 relative">
-                        {vehicle.photo ? (
-                            <img
-                                src={vehicle.photo}
-                                alt={vehicle.displayName}
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <div className="flex items-center justify-center h-full">
-                                <TruckIcon className="h-20 w-20 text-secondary-300 dark:text-secondary-600" />
-                            </div>
-                        )}
-                        <div className="absolute top-4 left-4 flex gap-2">
-                            <Badge variant={vehicle.vehicleType.slug === 'bike' ? 'primary' : 'info'}>
-                                {vehicle.vehicleType.name}
-                            </Badge>
+            <div className="max-w-4xl mx-auto space-y-6" style={accentStyle}>
+
+                {/* Top bar: owner actions or info */}
+                <div className={clsx(
+                    'flex items-center gap-3 flex-wrap',
+                    isOwner ? 'justify-between' : 'justify-end',
+                )}>
+                    {isOwner && (
+                        <div className="flex items-center gap-2">
+                            {vehicle.isActive && (
+                                <Badge variant="primary" size="sm">
+                                    <StarIconSolid className="h-3 w-3 -ml-0.5" />
+                                    Primary Vehicle
+                                </Badge>
+                            )}
+                            {ownerIsPremium && (
+                                <Badge variant="warning" size="sm">
+                                    <SparklesIcon className="h-3 w-3 -ml-0.5" />
+                                    PRO
+                                </Badge>
+                            )}
                         </div>
-                        {vehicle.isActive && (
-                            <Badge variant="primary" className="absolute top-4 right-4">
-                                <StarIconSolid className="h-4 w-4 mr-1" />
-                                Primary Vehicle
-                            </Badge>
-                        )}
-                        {vehicle.isAvailableForMatch && (
-                            <Badge variant="success" className="absolute bottom-4 right-4">
-                                <BoltIcon className="h-4 w-4 mr-1" />
-                                Match Ready
-                            </Badge>
+                    )}
+                    <div className="flex items-center gap-2">
+                        {/* Like button */}
+                        <button
+                            onClick={handleToggleLike}
+                            className={clsx(
+                                'flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-medium transition-all',
+                                isLiked
+                                    ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/30'
+                                    : 'bg-white dark:bg-secondary-700 border border-secondary-200 dark:border-secondary-600 text-secondary-600 dark:text-secondary-300 hover:border-red-300 dark:hover:border-red-500/40 hover:text-red-500',
+                            )}
+                        >
+                            {isLiked ? (
+                                <HeartIconSolid className="h-5 w-5 text-red-500" />
+                            ) : (
+                                <HeartIconOutline className="h-5 w-5" />
+                            )}
+                            {likesCount > 0 ? likesCount : 'Like'}
+                        </button>
+                        {isOwner && (
+                            <Link href={route('vehicles.edit', vehicle.uuid)}>
+                                <SecondaryButton>
+                                    <PencilIcon className="h-4 w-4 mr-1.5" />
+                                    Edit
+                                </SecondaryButton>
+                            </Link>
                         )}
                     </div>
-                </Card>
+                </div>
 
-                {/* Details Section */}
-                <Card>
-                    <div className="flex items-start justify-between mb-6">
-                        <div>
-                            <h2 className="text-2xl font-bold text-secondary-900 dark:text-white">
-                                {vehicle.displayName}
-                            </h2>
-                            <div className="flex items-center gap-2 mt-1 text-secondary-500 dark:text-secondary-400">
-                                {vehicle.engineSpec && <span>{vehicle.engineSpec}</span>}
-                                {vehicle.category && (
-                                    <>
-                                        <span>&bull;</span>
-                                        <span>{vehicle.category.name}</span>
-                                    </>
+                {/* Quick Specs Bar */}
+                {quickSpecs.length > 0 && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                        {quickSpecs.map((spec, i) => (
+                            <span
+                                key={i}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary-100 dark:bg-secondary-700/60 text-sm text-secondary-700 dark:text-secondary-300"
+                            >
+                                {spec.icon}
+                                {spec.label}
+                            </span>
+                        ))}
+                    </div>
+                )}
+
+                {/* Pro accent border wrapper */}
+                <div className={clsx(
+                    ownerIsPremium && 'ring-1 ring-amber-400/30 rounded-2xl',
+                )}>
+                    {/* Template renders the vehicle content */}
+                    <TemplateComponent
+                        vehicle={vehicle}
+                        isOwner={isOwner}
+                        ownerIsPremium={ownerIsPremium}
+                    />
+                </div>
+
+                {/* Owner Profile Card */}
+                {vehicle.owner && (
+                    <Card padding="lg" className={clsx(
+                        ownerIsPremium && 'border border-amber-400/20 dark:border-amber-400/10',
+                    )}>
+                        <div className="flex items-center gap-4">
+                            <Link href={route('profile.show', vehicle.owner.uuid)}>
+                                <Avatar
+                                    src={vehicle.owner.avatar}
+                                    name={vehicle.owner.displayName}
+                                    size="lg"
+                                />
+                            </Link>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <Link
+                                        href={route('profile.show', vehicle.owner.uuid)}
+                                        className="font-semibold text-secondary-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                                    >
+                                        {vehicle.owner.displayName}
+                                    </Link>
+                                    {vehicle.owner.isPremium && <ProBadge size="sm" />}
+                                </div>
+                                {vehicle.owner.username && (
+                                    <p className="text-sm text-secondary-500 dark:text-secondary-400">
+                                        @{vehicle.owner.username}
+                                    </p>
                                 )}
                             </div>
-                        </div>
-                        {isOwner && (
-                            <div className="flex gap-2">
-                                <Link href={route('vehicles.edit', vehicle.id)}>
-                                    <SecondaryButton>
-                                        <PencilIcon className="h-4 w-4 mr-2" />
-                                        Edit
-                                    </SecondaryButton>
+                            {!isOwner && (
+                                <Link
+                                    href={route('profile.show', vehicle.owner.uuid)}
+                                    className="px-4 py-2 rounded-xl text-sm font-semibold bg-primary-600 hover:bg-primary-500 text-white transition-colors shrink-0"
+                                >
+                                    View Profile
                                 </Link>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="space-y-4">
-                            {vehicle.category && (
-                                <div>
-                                    <dt className="text-sm font-medium text-secondary-500 dark:text-secondary-400">
-                                        Category
-                                    </dt>
-                                    <dd className="mt-1 text-secondary-900 dark:text-white">
-                                        {vehicle.category.name}
-                                    </dd>
-                                </div>
-                            )}
-                            <div>
-                                <dt className="text-sm font-medium text-secondary-500 dark:text-secondary-400">
-                                    Modification Level
-                                </dt>
-                                <dd className="mt-1">
-                                    <Badge
-                                        variant={
-                                            vehicle.modificationLevel === 'built'
-                                                ? 'warning'
-                                                : vehicle.modificationLevel === 'mild'
-                                                  ? 'info'
-                                                  : 'secondary'
-                                        }
-                                    >
-                                        {modLevelLabels[vehicle.modificationLevel || 'stock'] || vehicle.modificationLevel}
-                                    </Badge>
-                                </dd>
-                            </div>
-                            {vehicle.color && (
-                                <div>
-                                    <dt className="text-sm font-medium text-secondary-500 dark:text-secondary-400">
-                                        Color
-                                    </dt>
-                                    <dd className="mt-1 text-secondary-900 dark:text-white">
-                                        {vehicle.color}
-                                    </dd>
-                                </div>
                             )}
                         </div>
-                        <div className="space-y-4">
-                            {vehicle.vehicleType.slug === 'bike' && vehicle.bikeDetails && (
-                                <div>
-                                    <dt className="text-sm font-medium text-secondary-500 dark:text-secondary-400">
-                                        Engine Displacement
-                                    </dt>
-                                    <dd className="mt-1 text-secondary-900 dark:text-white">
-                                        {vehicle.bikeDetails.cc}cc
-                                    </dd>
-                                </div>
-                            )}
-                            {vehicle.vehicleType.slug === 'car' && vehicle.carDetails && (
-                                <>
-                                    {vehicle.carDetails.engineLiters && (
-                                        <div>
-                                            <dt className="text-sm font-medium text-secondary-500 dark:text-secondary-400">
-                                                Engine Size
-                                            </dt>
-                                            <dd className="mt-1 text-secondary-900 dark:text-white">
-                                                {vehicle.carDetails.engineLiters}L
-                                            </dd>
-                                        </div>
-                                    )}
-                                    {vehicle.carDetails.horsepower && (
-                                        <div>
-                                            <dt className="text-sm font-medium text-secondary-500 dark:text-secondary-400">
-                                                Horsepower
-                                            </dt>
-                                            <dd className="mt-1 text-secondary-900 dark:text-white">
-                                                {vehicle.carDetails.horsepower} hp
-                                            </dd>
-                                        </div>
-                                    )}
-                                    {vehicle.carDetails.transmissionLabel && (
-                                        <div>
-                                            <dt className="text-sm font-medium text-secondary-500 dark:text-secondary-400">
-                                                Transmission
-                                            </dt>
-                                            <dd className="mt-1 text-secondary-900 dark:text-white">
-                                                {vehicle.carDetails.transmissionLabel}
-                                            </dd>
-                                        </div>
-                                    )}
-                                    {vehicle.carDetails.drivetrainLabel && (
-                                        <div>
-                                            <dt className="text-sm font-medium text-secondary-500 dark:text-secondary-400">
-                                                Drivetrain
-                                            </dt>
-                                            <dd className="mt-1 text-secondary-900 dark:text-white">
-                                                {vehicle.carDetails.drivetrainLabel}
-                                            </dd>
-                                        </div>
-                                    )}
-                                    {vehicle.carDetails.doors && (
-                                        <div>
-                                            <dt className="text-sm font-medium text-secondary-500 dark:text-secondary-400">
-                                                Doors
-                                            </dt>
-                                            <dd className="mt-1 text-secondary-900 dark:text-white">
-                                                {vehicle.carDetails.doors}
-                                            </dd>
-                                        </div>
-                                    )}
-                                </>
-                            )}
-                            {vehicle.plateNumber && (
-                                <div>
-                                    <dt className="text-sm font-medium text-secondary-500 dark:text-secondary-400">
-                                        Plate Number
-                                    </dt>
-                                    <dd className="mt-1 text-secondary-900 dark:text-white">
-                                        {vehicle.plateNumber}
-                                    </dd>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                    </Card>
+                )}
 
-                    {vehicle.notes && (
-                        <div className="mt-6 pt-6 border-t border-secondary-200 dark:border-secondary-700">
-                            <dt className="text-sm font-medium text-secondary-500 dark:text-secondary-400">
-                                Notes
-                            </dt>
-                            <dd className="mt-1 text-secondary-900 dark:text-white whitespace-pre-wrap">
-                                {vehicle.notes}
-                            </dd>
-                        </div>
-                    )}
-
-                    {!isOwner && vehicle.owner && (
-                        <div className="mt-6 pt-6 border-t border-secondary-200 dark:border-secondary-700">
-                            <dt className="text-sm font-medium text-secondary-500 dark:text-secondary-400">
-                                Owner
-                            </dt>
-                            <dd className="mt-1 text-secondary-900 dark:text-white">
-                                {vehicle.owner.name}
-                            </dd>
-                        </div>
-                    )}
-                </Card>
-
-                {/* Actions Section */}
+                {/* Owner Actions */}
                 {isOwner && (
-                    <Card>
+                    <Card padding="lg">
                         <div className="flex flex-wrap items-center justify-between gap-4">
                             <div className="flex flex-wrap gap-4">
                                 {!vehicle.isActive && (
@@ -286,13 +239,6 @@ export default function VehiclesShow({ vehicle, isOwner }: VehiclesShowProps) {
                                         Set as primary vehicle
                                     </button>
                                 )}
-                                <button
-                                    onClick={handleToggleMatch}
-                                    className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
-                                >
-                                    <BoltIcon className="h-5 w-5 mr-2" />
-                                    {vehicle.isAvailableForMatch ? 'Remove from match' : 'Make available for match'}
-                                </button>
                             </div>
                             <div className="ml-auto">
                                 <DangerButton onClick={() => setConfirmingDelete(true)}>

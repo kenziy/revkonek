@@ -22,6 +22,7 @@ export default function UpdateProfileInformation({
     const { data, setData, patch, errors, processing, recentlySuccessful } =
         useForm({
             name: user.name,
+            username: user.username || '',
             email: user.email,
         });
 
@@ -45,6 +46,22 @@ export default function UpdateProfileInformation({
                         autoComplete="name"
                     />
                     <InputError className="mt-1.5" message={errors.name} />
+                </div>
+
+                <div>
+                    <InputLabel htmlFor="username" value="Username" />
+                    <TextInput
+                        id="username"
+                        className="mt-1.5"
+                        value={data.username}
+                        onChange={(e) => setData('username', e.target.value)}
+                        autoComplete="username"
+                        placeholder="e.g. rider_one"
+                    />
+                    <p className="mt-1.5 text-xs text-secondary-500 dark:text-secondary-400">
+                        Optional. Used as your public display name. Letters, numbers, and underscores only.
+                    </p>
+                    <InputError className="mt-1.5" message={errors.username} />
                 </div>
 
                 <div>

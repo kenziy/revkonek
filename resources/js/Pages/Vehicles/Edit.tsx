@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { Card } from '@/Components/UI';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Card, Tabs } from '@/Components/UI';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import InputError from '@/Components/InputError';
@@ -10,13 +10,20 @@ import Select from '@/Components/Form/Select';
 import Textarea from '@/Components/Form/Textarea';
 import FileUpload from '@/Components/Form/FileUpload';
 import Switch from '@/Components/Form/Switch';
+import UpgradePrompt from '@/Components/Vehicles/UpgradePrompt';
+import PhotoManager from '@/Components/Vehicles/Edit/PhotoManager';
+import CustomizationForm from '@/Components/Vehicles/Edit/CustomizationForm';
+import ModsManager from '@/Components/Vehicles/Edit/ModsManager';
+import SocialLinksManager from '@/Components/Vehicles/Edit/SocialLinksManager';
 import { FormEventHandler } from 'react';
-import { TruckIcon } from '@heroicons/react/24/outline';
+import { TruckIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+import { SparklesIcon } from '@heroicons/react/24/solid';
 import type { VehicleForEdit, VehicleCategory } from '@/types/vehicle';
 
 interface VehiclesEditProps {
     vehicle?: VehicleForEdit;
     categories: VehicleCategory[];
+    isPremium?: boolean;
 }
 
 const modificationLevels = [
@@ -47,7 +54,16 @@ const yearOptions = Array.from({ length: 50 }, (_, i) => ({
     label: String(currentYear - i),
 }));
 
-export default function VehiclesEdit({ vehicle, categories }: VehiclesEditProps) {
+function ProTabLabel({ children }: { children: React.ReactNode }) {
+    return (
+        <span className="inline-flex items-center gap-1">
+            {children}
+            <SparklesIcon className="h-3 w-3 text-amber-500" />
+        </span>
+    );
+}
+
+export default function VehiclesEdit({ vehicle, categories, isPremium = false }: VehiclesEditProps) {
     const { data, setData, post, processing, errors } = useForm({
         _method: 'PUT',
         vehicle_category_id: vehicle?.vehicleCategoryId?.toString() || '',
@@ -59,7 +75,6 @@ export default function VehiclesEdit({ vehicle, categories }: VehiclesEditProps)
         plate_number: vehicle?.plateNumber || '',
         notes: vehicle?.notes || '',
         is_active: vehicle?.isActive || false,
-        is_available_for_match: vehicle?.isAvailableForMatch || false,
         photo: null as File | null,
         // Bike-specific
         cc: vehicle?.cc?.toString() || '',
@@ -74,7 +89,7 @@ export default function VehiclesEdit({ vehicle, categories }: VehiclesEditProps)
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         if (vehicle) {
-            post(route('vehicles.update', vehicle.id), {
+            post(route('vehicles.update', vehicle.uuid), {
                 forceFormData: true,
             });
         }
@@ -117,260 +132,334 @@ export default function VehiclesEdit({ vehicle, categories }: VehiclesEditProps)
             <Head title={`Edit ${vehicle.make} ${vehicle.model}`} />
 
             <div className="max-w-2xl mx-auto">
-                <Card padding="lg">
-                    <form onSubmit={submit} className="space-y-6">
-                        {vehicle.photo && (
-                            <div className="mb-6">
-                                <img
-                                    src={vehicle.photo}
-                                    alt={`${vehicle.make} ${vehicle.model}`}
-                                    className="w-full h-48 object-cover rounded-lg"
-                                />
-                            </div>
-                        )}
+                <Tabs defaultValue="details">
+                    <Tabs.List fullWidth className="mb-6">
+                        <Tabs.Trigger value="details">Details</Tabs.Trigger>
+                        <Tabs.Trigger value="photos">
+                            <ProTabLabel>Photos</ProTabLabel>
+                        </Tabs.Trigger>
+                        <Tabs.Trigger value="customize">
+                            <ProTabLabel>Customize</ProTabLabel>
+                        </Tabs.Trigger>
+                        <Tabs.Trigger value="mods">
+                            <ProTabLabel>Mods</ProTabLabel>
+                        </Tabs.Trigger>
+                        <Tabs.Trigger value="links">
+                            <ProTabLabel>Links</ProTabLabel>
+                        </Tabs.Trigger>
+                    </Tabs.List>
 
-                        <div className="grid gap-6 sm:grid-cols-2">
-                            <div>
-                                <InputLabel htmlFor="make" value="Make" />
-                                <TextInput
-                                    id="make"
-                                    value={data.make}
-                                    onChange={(e) => setData('make', e.target.value)}
-                                    placeholder={isBike
-                                        ? 'e.g., Honda, Yamaha, Kawasaki'
-                                        : 'e.g., Toyota, Honda, Ford'}
-                                    className="mt-1"
-                                    required
-                                />
-                                <InputError message={errors.make} className="mt-2" />
-                            </div>
+                    {/* Details Tab — all users */}
+                    <Tabs.Content value="details">
+                        <Card padding="lg">
+                            <form onSubmit={submit} className="space-y-6">
+                                {vehicle.photo && (
+                                    <div className="mb-6">
+                                        <img
+                                            src={vehicle.photo}
+                                            alt={`${vehicle.make} ${vehicle.model}`}
+                                            className="w-full h-48 object-cover rounded-lg"
+                                        />
+                                    </div>
+                                )}
 
-                            <div>
-                                <InputLabel htmlFor="model" value="Model" />
-                                <TextInput
-                                    id="model"
-                                    value={data.model}
-                                    onChange={(e) => setData('model', e.target.value)}
-                                    placeholder={isBike
-                                        ? 'e.g., CBR600RR, R6, ZX-6R'
-                                        : 'e.g., Civic, Camry, Mustang'}
-                                    className="mt-1"
-                                    required
-                                />
-                                <InputError message={errors.model} className="mt-2" />
-                            </div>
-                        </div>
+                                <div className="grid gap-6 sm:grid-cols-2">
+                                    <div>
+                                        <InputLabel htmlFor="make" value="Make" />
+                                        <TextInput
+                                            id="make"
+                                            value={data.make}
+                                            onChange={(e) => setData('make', e.target.value)}
+                                            placeholder={isBike ? 'e.g., Honda, Yamaha, Kawasaki' : 'e.g., Toyota, Honda, Ford'}
+                                            className="mt-1"
+                                            required
+                                        />
+                                        <InputError message={errors.make} className="mt-2" />
+                                    </div>
+                                    <div>
+                                        <InputLabel htmlFor="model" value="Model" />
+                                        <TextInput
+                                            id="model"
+                                            value={data.model}
+                                            onChange={(e) => setData('model', e.target.value)}
+                                            placeholder={isBike ? 'e.g., CBR600RR, R6, ZX-6R' : 'e.g., Civic, Camry, Mustang'}
+                                            className="mt-1"
+                                            required
+                                        />
+                                        <InputError message={errors.model} className="mt-2" />
+                                    </div>
+                                </div>
 
-                        <div className="grid gap-6 sm:grid-cols-2">
-                            <div>
-                                <InputLabel htmlFor="year" value="Year" />
-                                <Select
-                                    id="year"
-                                    value={data.year}
-                                    onChange={(e) => setData('year', Number(e.target.value))}
-                                    options={yearOptions}
-                                    className="mt-1"
-                                />
-                                <InputError message={errors.year} className="mt-2" />
-                            </div>
+                                <div className="grid gap-6 sm:grid-cols-2">
+                                    <div>
+                                        <InputLabel htmlFor="year" value="Year" />
+                                        <Select
+                                            id="year"
+                                            value={data.year}
+                                            onChange={(e) => setData('year', Number(e.target.value))}
+                                            options={yearOptions}
+                                            className="mt-1"
+                                        />
+                                        <InputError message={errors.year} className="mt-2" />
+                                    </div>
+                                    {categoryOptions.length > 0 && (
+                                        <div>
+                                            <InputLabel htmlFor="category" value="Category" />
+                                            <Select
+                                                id="category"
+                                                value={data.vehicle_category_id}
+                                                onChange={(e) => setData('vehicle_category_id', e.target.value)}
+                                                options={[{ value: '', label: 'Select category' }, ...categoryOptions]}
+                                                className="mt-1"
+                                            />
+                                            <InputError message={errors.vehicle_category_id} className="mt-2" />
+                                        </div>
+                                    )}
+                                </div>
 
-                            {categoryOptions.length > 0 && (
+                                {isBike && (
+                                    <div>
+                                        <InputLabel htmlFor="cc" value="Engine Displacement (cc)" />
+                                        <TextInput
+                                            id="cc"
+                                            type="number"
+                                            value={data.cc}
+                                            onChange={(e) => setData('cc', e.target.value)}
+                                            placeholder="e.g., 600, 1000"
+                                            className="mt-1"
+                                            min="50"
+                                            max="3000"
+                                            required
+                                        />
+                                        <InputError message={errors.cc} className="mt-2" />
+                                    </div>
+                                )}
+
+                                {isCar && (
+                                    <>
+                                        <div className="grid gap-6 sm:grid-cols-2">
+                                            <div>
+                                                <InputLabel htmlFor="engine_liters" value="Engine Size (Liters)" />
+                                                <TextInput
+                                                    id="engine_liters"
+                                                    type="number"
+                                                    step="0.1"
+                                                    value={data.engine_liters}
+                                                    onChange={(e) => setData('engine_liters', e.target.value)}
+                                                    placeholder="e.g., 2.0, 3.5"
+                                                    className="mt-1"
+                                                />
+                                                <InputError message={errors.engine_liters} className="mt-2" />
+                                            </div>
+                                            <div>
+                                                <InputLabel htmlFor="horsepower" value="Horsepower" />
+                                                <TextInput
+                                                    id="horsepower"
+                                                    type="number"
+                                                    value={data.horsepower}
+                                                    onChange={(e) => setData('horsepower', e.target.value)}
+                                                    placeholder="e.g., 200, 450"
+                                                    className="mt-1"
+                                                />
+                                                <InputError message={errors.horsepower} className="mt-2" />
+                                            </div>
+                                        </div>
+                                        <div className="grid gap-6 sm:grid-cols-2">
+                                            <div>
+                                                <InputLabel htmlFor="transmission" value="Transmission" />
+                                                <Select
+                                                    id="transmission"
+                                                    value={data.transmission}
+                                                    onChange={(e) => setData('transmission', e.target.value)}
+                                                    options={transmissionOptions}
+                                                    className="mt-1"
+                                                />
+                                                <InputError message={errors.transmission} className="mt-2" />
+                                            </div>
+                                            <div>
+                                                <InputLabel htmlFor="drivetrain" value="Drivetrain" />
+                                                <Select
+                                                    id="drivetrain"
+                                                    value={data.drivetrain}
+                                                    onChange={(e) => setData('drivetrain', e.target.value)}
+                                                    options={drivetrainOptions}
+                                                    className="mt-1"
+                                                />
+                                                <InputError message={errors.drivetrain} className="mt-2" />
+                                            </div>
+                                        </div>
+                                        <div className="w-1/2 sm:w-1/4">
+                                            <InputLabel htmlFor="doors" value="Doors" />
+                                            <TextInput
+                                                id="doors"
+                                                type="number"
+                                                value={data.doors}
+                                                onChange={(e) => setData('doors', e.target.value)}
+                                                placeholder="e.g., 2, 4"
+                                                className="mt-1"
+                                                min="2"
+                                                max="5"
+                                            />
+                                            <InputError message={errors.doors} className="mt-2" />
+                                        </div>
+                                    </>
+                                )}
+
+                                <div className="grid gap-6 sm:grid-cols-2">
+                                    <div>
+                                        <InputLabel htmlFor="modification_level" value="Modification Level" />
+                                        <Select
+                                            id="modification_level"
+                                            value={data.modification_level}
+                                            onChange={(e) => setData('modification_level', e.target.value)}
+                                            options={modificationLevels}
+                                            className="mt-1"
+                                        />
+                                        <InputError message={errors.modification_level} className="mt-2" />
+                                    </div>
+                                    <div>
+                                        <InputLabel htmlFor="color" value="Color (Optional)" />
+                                        <TextInput
+                                            id="color"
+                                            value={data.color}
+                                            onChange={(e) => setData('color', e.target.value)}
+                                            placeholder="e.g., Red, Matte Black"
+                                            className="mt-1"
+                                        />
+                                        <InputError message={errors.color} className="mt-2" />
+                                    </div>
+                                </div>
+
                                 <div>
-                                    <InputLabel htmlFor="category" value="Category" />
-                                    <Select
-                                        id="category"
-                                        value={data.vehicle_category_id}
-                                        onChange={(e) => setData('vehicle_category_id', e.target.value)}
-                                        options={[{ value: '', label: 'Select category' }, ...categoryOptions]}
-                                        className="mt-1"
-                                    />
-                                    <InputError message={errors.vehicle_category_id} className="mt-2" />
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Bike-specific fields */}
-                        {isBike && (
-                            <div>
-                                <InputLabel htmlFor="cc" value="Engine Displacement (cc)" />
-                                <TextInput
-                                    id="cc"
-                                    type="number"
-                                    value={data.cc}
-                                    onChange={(e) => setData('cc', e.target.value)}
-                                    placeholder="e.g., 600, 1000"
-                                    className="mt-1"
-                                    min="50"
-                                    max="3000"
-                                    required
-                                />
-                                <InputError message={errors.cc} className="mt-2" />
-                            </div>
-                        )}
-
-                        {/* Car-specific fields */}
-                        {isCar && (
-                            <>
-                                <div className="grid gap-6 sm:grid-cols-2">
-                                    <div>
-                                        <InputLabel htmlFor="engine_liters" value="Engine Size (Liters)" />
-                                        <TextInput
-                                            id="engine_liters"
-                                            type="number"
-                                            step="0.1"
-                                            value={data.engine_liters}
-                                            onChange={(e) => setData('engine_liters', e.target.value)}
-                                            placeholder="e.g., 2.0, 3.5"
-                                            className="mt-1"
-                                        />
-                                        <InputError message={errors.engine_liters} className="mt-2" />
-                                    </div>
-
-                                    <div>
-                                        <InputLabel htmlFor="horsepower" value="Horsepower" />
-                                        <TextInput
-                                            id="horsepower"
-                                            type="number"
-                                            value={data.horsepower}
-                                            onChange={(e) => setData('horsepower', e.target.value)}
-                                            placeholder="e.g., 200, 450"
-                                            className="mt-1"
-                                        />
-                                        <InputError message={errors.horsepower} className="mt-2" />
-                                    </div>
-                                </div>
-
-                                <div className="grid gap-6 sm:grid-cols-2">
-                                    <div>
-                                        <InputLabel htmlFor="transmission" value="Transmission" />
-                                        <Select
-                                            id="transmission"
-                                            value={data.transmission}
-                                            onChange={(e) => setData('transmission', e.target.value)}
-                                            options={transmissionOptions}
-                                            className="mt-1"
-                                        />
-                                        <InputError message={errors.transmission} className="mt-2" />
-                                    </div>
-
-                                    <div>
-                                        <InputLabel htmlFor="drivetrain" value="Drivetrain" />
-                                        <Select
-                                            id="drivetrain"
-                                            value={data.drivetrain}
-                                            onChange={(e) => setData('drivetrain', e.target.value)}
-                                            options={drivetrainOptions}
-                                            className="mt-1"
-                                        />
-                                        <InputError message={errors.drivetrain} className="mt-2" />
-                                    </div>
-                                </div>
-
-                                <div className="w-1/2 sm:w-1/4">
-                                    <InputLabel htmlFor="doors" value="Doors" />
+                                    <InputLabel htmlFor="plate_number" value="Plate Number (Optional)" />
                                     <TextInput
-                                        id="doors"
-                                        type="number"
-                                        value={data.doors}
-                                        onChange={(e) => setData('doors', e.target.value)}
-                                        placeholder="e.g., 2, 4"
-                                        className="mt-1"
-                                        min="2"
-                                        max="5"
+                                        id="plate_number"
+                                        value={data.plate_number}
+                                        onChange={(e) => setData('plate_number', e.target.value)}
+                                        placeholder="e.g., ABC 1234"
+                                        className="mt-1 sm:w-1/2"
                                     />
-                                    <InputError message={errors.doors} className="mt-2" />
+                                    <InputError message={errors.plate_number} className="mt-2" />
                                 </div>
-                            </>
+
+                                <div>
+                                    <InputLabel htmlFor="notes" value="Notes (Optional)" />
+                                    <Textarea
+                                        id="notes"
+                                        value={data.notes}
+                                        onChange={(e) => setData('notes', e.target.value)}
+                                        placeholder="Any additional information about your vehicle..."
+                                        rows={3}
+                                        className="mt-1"
+                                    />
+                                    <InputError message={errors.notes} className="mt-2" />
+                                </div>
+
+                                <div>
+                                    <InputLabel value="Update Photo (Optional)" />
+                                    <FileUpload
+                                        accept="image/*"
+                                        onChange={handlePhotoChange}
+                                        className="mt-1"
+                                    />
+                                    <InputError message={errors.photo} className="mt-2" />
+                                </div>
+
+                                <div className="border-t border-secondary-200 dark:border-secondary-700 pt-6 space-y-4">
+                                    <Switch
+                                        checked={data.is_active}
+                                        onChange={(checked) => setData('is_active', checked)}
+                                        label="Set as primary vehicle"
+                                        description="This vehicle will be displayed as your main ride on your profile"
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-end gap-4 pt-4">
+                                    <Link href={route('vehicles.show', vehicle.uuid)}>
+                                        <SecondaryButton type="button">Cancel</SecondaryButton>
+                                    </Link>
+                                    <PrimaryButton type="submit" disabled={processing}>
+                                        {processing ? 'Saving...' : 'Save Changes'}
+                                    </PrimaryButton>
+                                </div>
+                            </form>
+                        </Card>
+                    </Tabs.Content>
+
+                    {/* Photos Tab — Pro */}
+                    <Tabs.Content value="photos">
+                        {isPremium ? (
+                            <Card padding="lg">
+                                <PhotoManager
+                                    vehicleUuid={vehicle.uuid}
+                                    photos={vehicle.photos || []}
+                                />
+                            </Card>
+                        ) : (
+                            <UpgradePrompt
+                                feature="multi-photo galleries"
+                                description="Upload up to 10 photos, reorder them, and create a beautiful gallery for your vehicle page."
+                            />
                         )}
+                    </Tabs.Content>
 
-                        <div className="grid gap-6 sm:grid-cols-2">
-                            <div>
-                                <InputLabel htmlFor="modification_level" value="Modification Level" />
-                                <Select
-                                    id="modification_level"
-                                    value={data.modification_level}
-                                    onChange={(e) => setData('modification_level', e.target.value)}
-                                    options={modificationLevels}
-                                    className="mt-1"
+                    {/* Customize Tab — Pro */}
+                    <Tabs.Content value="customize">
+                        {isPremium ? (
+                            <Card padding="lg">
+                                <CustomizationForm
+                                    vehicleUuid={vehicle.uuid}
+                                    layoutTemplate={vehicle.layoutTemplate}
+                                    accentColor={vehicle.accentColor}
+                                    backgroundStyle={vehicle.backgroundStyle}
+                                    story={vehicle.story}
+                                    coverImage={vehicle.coverImage}
+                                    youtubeUrl={vehicle.youtubeUrl}
+                                    youtubeAutoplay={vehicle.youtubeAutoplay}
                                 />
-                                <InputError message={errors.modification_level} className="mt-2" />
-                            </div>
+                            </Card>
+                        ) : (
+                            <UpgradePrompt
+                                feature="page customization"
+                                description="Choose from layout templates, set custom accent colors, add a cover banner, background music, and write your build story."
+                            />
+                        )}
+                    </Tabs.Content>
 
-                            <div>
-                                <InputLabel htmlFor="color" value="Color (Optional)" />
-                                <TextInput
-                                    id="color"
-                                    value={data.color}
-                                    onChange={(e) => setData('color', e.target.value)}
-                                    placeholder="e.g., Red, Matte Black"
-                                    className="mt-1"
+                    {/* Mods Tab — Pro */}
+                    <Tabs.Content value="mods">
+                        {isPremium ? (
+                            <Card padding="lg">
+                                <ModsManager
+                                    vehicleUuid={vehicle.uuid}
+                                    mods={vehicle.mods || []}
                                 />
-                                <InputError message={errors.color} className="mt-2" />
-                            </div>
-                        </div>
-
-                        <div>
-                            <InputLabel htmlFor="plate_number" value="Plate Number (Optional)" />
-                            <TextInput
-                                id="plate_number"
-                                value={data.plate_number}
-                                onChange={(e) => setData('plate_number', e.target.value)}
-                                placeholder="e.g., ABC 1234"
-                                className="mt-1 sm:w-1/2"
+                            </Card>
+                        ) : (
+                            <UpgradePrompt
+                                feature="mods & parts list"
+                                description="Showcase your mods and parts, track your total investment, and organize by category."
                             />
-                            <InputError message={errors.plate_number} className="mt-2" />
-                        </div>
+                        )}
+                    </Tabs.Content>
 
-                        <div>
-                            <InputLabel htmlFor="notes" value="Notes (Optional)" />
-                            <Textarea
-                                id="notes"
-                                value={data.notes}
-                                onChange={(e) => setData('notes', e.target.value)}
-                                placeholder="Any additional information about your vehicle..."
-                                rows={3}
-                                className="mt-1"
+                    {/* Social Links Tab — Pro */}
+                    <Tabs.Content value="links">
+                        {isPremium ? (
+                            <Card padding="lg">
+                                <SocialLinksManager
+                                    vehicleUuid={vehicle.uuid}
+                                    socialLinks={vehicle.socialLinks || []}
+                                />
+                            </Card>
+                        ) : (
+                            <UpgradePrompt
+                                feature="social links"
+                                description="Add links to your YouTube, Instagram, TikTok, and other social profiles on your vehicle page."
                             />
-                            <InputError message={errors.notes} className="mt-2" />
-                        </div>
-
-                        <div>
-                            <InputLabel value="Update Photo (Optional)" />
-                            <FileUpload
-                                accept="image/*"
-                                onChange={handlePhotoChange}
-                                className="mt-1"
-                            />
-                            <InputError message={errors.photo} className="mt-2" />
-                        </div>
-
-                        <div className="border-t border-secondary-200 dark:border-secondary-700 pt-6 space-y-4">
-                            <Switch
-                                checked={data.is_active}
-                                onChange={(checked) => setData('is_active', checked)}
-                                label="Set as primary vehicle"
-                                description="This vehicle will be displayed as your main ride on your profile"
-                            />
-                            <Switch
-                                checked={data.is_available_for_match}
-                                onChange={(checked) => setData('is_available_for_match', checked)}
-                                label="Available for match"
-                                description="Make this vehicle visible to others looking for a challenge"
-                            />
-                        </div>
-
-                        <div className="flex items-center justify-end gap-4 pt-4">
-                            <Link href={route('vehicles.show', vehicle.id)}>
-                                <SecondaryButton type="button">
-                                    Cancel
-                                </SecondaryButton>
-                            </Link>
-                            <PrimaryButton type="submit" disabled={processing}>
-                                {processing ? 'Saving...' : 'Save Changes'}
-                            </PrimaryButton>
-                        </div>
-                    </form>
-                </Card>
+                        )}
+                    </Tabs.Content>
+                </Tabs>
             </div>
         </AuthenticatedLayout>
     );

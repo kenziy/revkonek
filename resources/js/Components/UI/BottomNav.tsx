@@ -1,19 +1,16 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import clsx from 'clsx';
 import { ReactNode } from 'react';
 import {
     HomeIcon,
     UserGroupIcon,
     UserIcon,
-    BoltIcon,
-    MagnifyingGlassIcon,
+    TruckIcon,
 } from '@heroicons/react/24/outline';
 import {
     HomeIcon as HomeIconSolid,
     UserGroupIcon as UserGroupIconSolid,
     UserIcon as UserIconSolid,
-    BoltIcon as BoltIconSolid,
-    MagnifyingGlassIcon as MagnifyingGlassIconSolid,
 } from '@heroicons/react/24/solid';
 
 interface NavItem {
@@ -26,10 +23,9 @@ interface NavItem {
 
 interface BottomNavProps {
     currentRoute: string;
-    onChallengeClick?: () => void;
 }
 
-export default function BottomNav({ currentRoute, onChallengeClick }: BottomNavProps) {
+export default function BottomNav({ currentRoute }: BottomNavProps) {
     const navItems: NavItem[] = [
         {
             name: 'Home',
@@ -38,22 +34,16 @@ export default function BottomNav({ currentRoute, onChallengeClick }: BottomNavP
             iconActive: <HomeIconSolid className="h-6 w-6" />,
         },
         {
-            name: 'Match',
-            href: route('match.index'),
-            icon: <MagnifyingGlassIcon className="h-6 w-6" />,
-            iconActive: <MagnifyingGlassIconSolid className="h-6 w-6" />,
-        },
-        {
-            name: 'Challenge',
-            href: '#',
-            icon: <BoltIcon className="h-7 w-7" />,
-            iconActive: <BoltIconSolid className="h-7 w-7" />,
-        },
-        {
-            name: 'Groups',
-            href: route('groups.index'),
+            name: 'Clubs',
+            href: route('clubs.index'),
             icon: <UserGroupIcon className="h-6 w-6" />,
             iconActive: <UserGroupIconSolid className="h-6 w-6" />,
+        },
+        {
+            name: 'Vehicles',
+            href: route('vehicles.index'),
+            icon: <TruckIcon className="h-6 w-6" />,
+            iconActive: <TruckIcon className="h-6 w-6" />,
         },
         {
             name: 'Profile',
@@ -64,7 +54,6 @@ export default function BottomNav({ currentRoute, onChallengeClick }: BottomNavP
     ];
 
     const isActive = (href: string) => {
-        if (href === '#') return false;
         return currentRoute === href || window.location.pathname === new URL(href).pathname;
     };
 
@@ -78,28 +67,8 @@ export default function BottomNav({ currentRoute, onChallengeClick }: BottomNavP
             )}
         >
             <div className="flex items-center justify-around h-16 px-2">
-                {navItems.map((item, index) => {
+                {navItems.map((item) => {
                     const active = isActive(item.href);
-                    const isCenter = index === 2;
-
-                    if (isCenter) {
-                        return (
-                            <button
-                                key={item.name}
-                                onClick={onChallengeClick}
-                                className={clsx(
-                                    'relative flex flex-col items-center justify-center -mt-6',
-                                    'w-14 h-14 rounded-full',
-                                    'bg-primary-600 text-white shadow-lg',
-                                    'hover:bg-primary-500 active:scale-95',
-                                    'transition-all duration-200',
-                                    'dark:bg-primary-500 dark:hover:bg-primary-400'
-                                )}
-                            >
-                                {item.icon}
-                            </button>
-                        );
-                    }
 
                     return (
                         <Link

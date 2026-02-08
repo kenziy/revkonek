@@ -1,0 +1,1 @@
+import{j as o}from"./app-CQdR452s.js";import{c as a}from"./clsx-B-dksMZM.js";function c({value:t,className:e="",children:r,...s}){return o.jsx("label",{...s,className:a("block text-sm font-medium","text-secondary-700 dark:text-secondary-300",e),children:t||r})}export{c as I};

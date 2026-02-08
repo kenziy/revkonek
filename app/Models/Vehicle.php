@@ -5,13 +5,29 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Vehicle extends Model
 {
     use HasFactory, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::creating(function (Vehicle $vehicle) {
+            if (empty($vehicle->uuid)) {
+                $vehicle->uuid = Str::uuid()->toString();
+            }
+        });
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
 
     protected $fillable = [
         'user_id',
@@ -25,14 +41,21 @@ class Vehicle extends Model
         'plate_number',
         'notes',
         'is_active',
-        'is_available_for_match',
         'legacy_bike_id',
+        'layout_template',
+        'accent_color',
+        'background_style',
+        'story',
+        'cover_image_path',
+        'youtube_url',
+        'youtube_video_id',
+        'youtube_autoplay',
     ];
 
     protected $casts = [
         'year' => 'integer',
         'is_active' => 'boolean',
-        'is_available_for_match' => 'boolean',
+        'youtube_autoplay' => 'boolean',
     ];
 
     protected $appends = ['display_name', 'engine_spec'];
@@ -72,15 +95,26 @@ class Vehicle extends Model
         return $this->hasOne(VehiclePhoto::class)->where('is_primary', true);
     }
 
+    public function mods(): HasMany
+    {
+        return $this->hasMany(VehicleMod::class)->orderBy('sort_order');
+    }
+
+    public function socialLinks(): HasMany
+    {
+        return $this->hasMany(VehicleSocialLink::class)->orderBy('sort_order');
+    }
+
+    public function likedBy(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'vehicle_likes')
+            ->withTimestamps();
+    }
+
     // Scopes
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
-    }
-
-    public function scopeAvailableForMatch($query)
-    {
-        return $query->where('is_available_for_match', true);
     }
 
     public function scopeForUser($query, $userId)
@@ -150,8 +184,8 @@ class Vehicle extends Model
         $this->update(['is_active' => true]);
     }
 
-    public function toggleMatchAvailability(): void
+    public function getCoverImageUrlAttribute(): ?string
     {
-        $this->update(['is_available_for_match' => ! $this->is_available_for_match]);
+        return $this->cover_image_path ? asset('storage/'.$this->cover_image_path) : null;
     }
 }

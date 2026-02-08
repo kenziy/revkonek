@@ -5,11 +5,7 @@ namespace App\Models;
 use App\Enums\SubscriptionTier;
 use App\Models\Auth\RecoveryCode;
 use App\Models\Auth\SocialAccount;
-use App\Models\Challenge\Challenge;
-use App\Models\Challenge\UserChallengeStats;
-use App\Models\Group\Group;
-use App\Models\Match\AvailabilitySchedule;
-use App\Models\Match\MatchPreference;
+use App\Models\Club\Club;
 use App\Models\Profile\UserPrivacySetting;
 use App\Models\Profile\UserProfile;
 use App\Models\Shop\Shop;
@@ -23,12 +19,24 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, HasRoles, Notifiable;
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if (empty($user->uuid)) {
+                $user->uuid = Str::uuid()->toString();
+            }
+        });
+    }
+
+    protected $appends = ['display_name'];
 
     protected $fillable = [
         'name',
@@ -38,10 +46,11 @@ class User extends Authenticatable
         'phone',
         'date_of_birth',
         'is_active',
-        'is_looking_for_match',
         'last_login_at',
         'two_factor_enabled',
         'two_factor_secret',
+        'onboarding_skipped_at',
+        'cover_photo',
     ];
 
     protected $hidden = [
@@ -58,9 +67,9 @@ class User extends Authenticatable
             'date_of_birth' => 'date',
             'password' => 'hashed',
             'is_active' => 'boolean',
-            'is_looking_for_match' => 'boolean',
             'last_login_at' => 'datetime',
             'two_factor_enabled' => 'boolean',
+            'onboarding_skipped_at' => 'datetime',
         ];
     }
 
@@ -97,11 +106,6 @@ class User extends Authenticatable
         return $this->hasOne(Vehicle::class)->where('is_active', true);
     }
 
-    public function vehiclesAvailableForMatch(): HasMany
-    {
-        return $this->hasMany(Vehicle::class)->where('is_available_for_match', true);
-    }
-
     // Auth Relations
     public function socialAccounts(): HasMany
     {
@@ -113,33 +117,43 @@ class User extends Authenticatable
         return $this->hasMany(RecoveryCode::class);
     }
 
-    // Challenges
-    public function sentChallenges(): HasMany
+    // Clubs
+    public function clubs(): BelongsToMany
     {
-        return $this->hasMany(Challenge::class, 'challenger_id');
-    }
-
-    public function receivedChallenges(): HasMany
-    {
-        return $this->hasMany(Challenge::class, 'challenged_id');
-    }
-
-    public function challengeStats(): HasOne
-    {
-        return $this->hasOne(UserChallengeStats::class);
-    }
-
-    // Groups
-    public function groups(): BelongsToMany
-    {
-        return $this->belongsToMany(Group::class, 'group_members')
+        return $this->belongsToMany(Club::class, 'club_members')
             ->withPivot(['role', 'joined_at', 'is_muted', 'muted_until'])
             ->withTimestamps();
     }
 
-    public function ownedGroups(): HasMany
+    public function ownedClubs(): HasMany
     {
-        return $this->hasMany(Group::class, 'owner_id');
+        return $this->hasMany(Club::class, 'owner_id');
+    }
+
+    public function followedClubs(): BelongsToMany
+    {
+        return $this->belongsToMany(Club::class, 'club_followers')
+            ->withTimestamps();
+    }
+
+    // Social — User Following
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'user_followers', 'user_id', 'follower_id')
+            ->withTimestamps();
+    }
+
+    public function following(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'user_followers', 'follower_id', 'user_id')
+            ->withTimestamps();
+    }
+
+    // Social — Vehicle Likes
+    public function likedVehicles(): BelongsToMany
+    {
+        return $this->belongsToMany(Vehicle::class, 'vehicle_likes')
+            ->withTimestamps();
     }
 
     // Shop
@@ -175,17 +189,6 @@ class User extends Authenticatable
         return $this->hasMany(Subscription::class);
     }
 
-    // Matchmaking
-    public function matchPreference(): HasOne
-    {
-        return $this->hasOne(MatchPreference::class);
-    }
-
-    public function availabilitySchedule(): HasOne
-    {
-        return $this->hasOne(AvailabilitySchedule::class);
-    }
-
     // Connections
     public function connections(): BelongsToMany
     {
@@ -198,6 +201,12 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(User::class, 'user_blocks', 'user_id', 'blocked_user_id')
             ->withTimestamps();
+    }
+
+    // Accessors
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->username ?? $this->name;
     }
 
     // Helper Methods
@@ -233,5 +242,15 @@ class User extends Authenticatable
             ->where('connected_user_id', $user->id)
             ->wherePivot('status', 'accepted')
             ->exists();
+    }
+
+    public function isFollowing(User $user): bool
+    {
+        return $this->following()->where('user_id', $user->id)->exists();
+    }
+
+    public function hasLikedVehicle(Vehicle $vehicle): bool
+    {
+        return $this->likedVehicles()->where('vehicle_id', $vehicle->id)->exists();
     }
 }

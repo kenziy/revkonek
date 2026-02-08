@@ -1,7 +1,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
-import { Card, Badge, EmptyState, FloatingActionButton } from '@/Components/UI';
+import { Card, Badge, EmptyState, FloatingActionButton, ProBadge } from '@/Components/UI';
 import { PlusIcon, TruckIcon, StarIcon } from '@heroicons/react/24/outline';
+import { usePage } from '@inertiajs/react';
 import type { Vehicle } from '@/types/vehicle';
 
 interface VehiclesIndexProps {
@@ -9,6 +10,9 @@ interface VehiclesIndexProps {
 }
 
 export default function VehiclesIndex({ vehicles = [] }: VehiclesIndexProps) {
+    const { auth } = usePage().props as any;
+    const isPremium = auth?.is_premium;
+
     return (
         <AuthenticatedLayout header="My Vehicles">
             <Head title="Vehicles" />
@@ -17,7 +21,7 @@ export default function VehiclesIndex({ vehicles = [] }: VehiclesIndexProps) {
                 {vehicles.length > 0 ? (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {vehicles.map((vehicle) => (
-                            <Link key={vehicle.id} href={route('vehicles.show', vehicle.id)}>
+                            <Link key={vehicle.id} href={route('vehicles.show', vehicle.uuid)}>
                                 <Card hoverable padding="none" className="overflow-hidden">
                                     <div className="aspect-video bg-secondary-100 dark:bg-secondary-800 relative">
                                         {vehicle.photo ? (
@@ -48,20 +52,14 @@ export default function VehiclesIndex({ vehicles = [] }: VehiclesIndexProps) {
                                                 Primary
                                             </Badge>
                                         )}
-                                        {vehicle.isAvailableForMatch && (
-                                            <Badge
-                                                variant="success"
-                                                size="sm"
-                                                className="absolute bottom-2 right-2"
-                                            >
-                                                Match Ready
-                                            </Badge>
-                                        )}
                                     </div>
                                     <div className="p-4">
-                                        <h3 className="font-semibold text-secondary-900 dark:text-white">
-                                            {vehicle.displayName}
-                                        </h3>
+                                        <div className="flex items-center gap-1.5">
+                                            <h3 className="font-semibold text-secondary-900 dark:text-white">
+                                                {vehicle.displayName}
+                                            </h3>
+                                            {isPremium && <ProBadge size="sm" />}
+                                        </div>
                                         <div className="flex items-center gap-2 mt-1">
                                             {vehicle.engineSpec && (
                                                 <span className="text-sm text-secondary-500 dark:text-secondary-400">

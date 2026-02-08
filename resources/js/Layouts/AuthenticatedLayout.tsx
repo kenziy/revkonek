@@ -1,11 +1,10 @@
 import { Link, usePage } from '@inertiajs/react';
-import { PropsWithChildren, ReactNode, useState } from 'react';
+import { PropsWithChildren, ReactNode, useState, useEffect, useCallback } from 'react';
 import clsx from 'clsx';
 import Dropdown from '@/Components/Dropdown';
-import { ThemeToggle, Avatar, Badge } from '@/Components/UI';
+import { ThemeToggle, Avatar, Badge, Alert, Footer } from '@/Components/UI';
 import {
     HomeIcon,
-    BoltIcon,
     UserGroupIcon,
     ShoppingBagIcon,
     BellIcon,
@@ -16,7 +15,7 @@ import {
     UserIcon,
     TruckIcon,
     ShieldExclamationIcon,
-    MagnifyingGlassIcon,
+    ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 
 interface NavItem {
@@ -30,20 +29,37 @@ export default function Authenticated({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
-    const { auth } = usePage().props as any;
+    const { auth, flash, features } = usePage().props as any;
     const user = auth?.user;
 
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [toast, setToast] = useState<{ variant: 'success' | 'error'; message: string } | null>(null);
 
-    const navigation: NavItem[] = [
+    useEffect(() => {
+        if (flash?.success) {
+            setToast({ variant: 'success', message: flash.success });
+        } else if (flash?.error) {
+            setToast({ variant: 'error', message: flash.error });
+        }
+    }, [flash?.success, flash?.error]);
+
+    const dismissToast = useCallback(() => setToast(null), []);
+
+    const allNavigation: NavItem[] = [
         { name: 'Dashboard', href: route('dashboard'), icon: HomeIcon },
-        { name: 'Match', href: route('match.index'), icon: MagnifyingGlassIcon },
-        { name: 'Challenges', href: route('challenges.index'), icon: BoltIcon },
-        { name: 'Groups', href: route('groups.index'), icon: UserGroupIcon },
+        { name: 'Clubs', href: route('clubs.index'), icon: UserGroupIcon },
         { name: 'Vehicles', href: route('vehicles.index'), icon: TruckIcon },
         { name: 'Shop', href: route('shop.index'), icon: ShoppingBagIcon },
         { name: 'SOS', href: route('sos.index'), icon: ShieldExclamationIcon },
     ];
+
+    const featureNavMap: Record<string, boolean> = {
+        'SOS': features?.sos !== false,
+    };
+
+    const navigation = allNavigation.filter(
+        (item) => featureNavMap[item.name] === undefined || featureNavMap[item.name]
+    );
 
     const isCurrentRoute = (href: string) => {
         try {
@@ -116,13 +132,13 @@ export default function Authenticated({
                         <div className="flex items-center gap-3">
                             <Avatar
                                 src={user?.avatar}
-                                name={user?.name}
+                                name={user?.display_name}
                                 size="md"
                                 status="online"
                             />
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-secondary-900 dark:text-white truncate">
-                                    {user?.name}
+                                    {user?.display_name}
                                 </p>
                                 <p className="text-xs text-secondary-500 dark:text-secondary-400 truncate">
                                     {user?.email}
@@ -133,7 +149,7 @@ export default function Authenticated({
                 </div>
             </aside>
 
-            <div className="lg:pl-64">
+            <div className="lg:pl-64 flex flex-col min-h-screen">
                 <header
                     className={clsx(
                         'sticky top-0 z-30 h-16',
@@ -176,7 +192,7 @@ export default function Authenticated({
                                     <button className="flex items-center gap-2 p-1 rounded-full hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors">
                                         <Avatar
                                             src={user?.avatar}
-                                            name={user?.name}
+                                            name={user?.display_name}
                                             size="sm"
                                             status="online"
                                         />
@@ -186,7 +202,7 @@ export default function Authenticated({
                                 <Dropdown.Content width="56">
                                     <div className="px-4 py-3 border-b border-secondary-100 dark:border-secondary-700">
                                         <p className="text-sm font-medium text-secondary-900 dark:text-white">
-                                            {user?.name}
+                                            {user?.display_name}
                                         </p>
                                         <p className="text-xs text-secondary-500 dark:text-secondary-400 truncate">
                                             {user?.email}
@@ -204,6 +220,14 @@ export default function Authenticated({
                                             Settings
                                         </span>
                                     </Dropdown.Link>
+                                    {auth?.is_admin && (
+                                        <Dropdown.Link href={route('admin.dashboard')}>
+                                            <span className="flex items-center gap-2 text-primary-600 dark:text-primary-400">
+                                                <ShieldCheckIcon className="h-4 w-4" />
+                                                Admin Dashboard
+                                            </span>
+                                        </Dropdown.Link>
+                                    )}
                                     <div className="border-t border-secondary-100 dark:border-secondary-700">
                                         <Dropdown.Link
                                             href={route('logout')}
@@ -222,8 +246,20 @@ export default function Authenticated({
                     </div>
                 </header>
 
-                <main className="p-4 lg:p-6">{children}</main>
+                <main className="flex-1 p-4 lg:p-6">{children}</main>
+                <Footer variant="compact" />
             </div>
+
+            {/* Toast Notifications */}
+            {toast && (
+                <div className="fixed bottom-6 right-6 z-50 max-w-sm">
+                    <Alert.Toast
+                        variant={toast.variant}
+                        message={toast.message}
+                        onClose={dismissToast}
+                    />
+                </div>
+            )}
         </div>
     );
 }

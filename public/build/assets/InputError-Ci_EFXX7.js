@@ -1,0 +1,1 @@
+import{j as e}from"./app-CQdR452s.js";import{c as o}from"./clsx-B-dksMZM.js";function a({message:r,className:t="",...n}){return r?e.jsx("p",{...n,className:o("text-sm","text-danger-600 dark:text-danger-400",t),children:r}):null}export{a as I};

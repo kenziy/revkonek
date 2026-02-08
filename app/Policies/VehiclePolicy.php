@@ -40,8 +40,4 @@ class VehiclePolicy
         return $user->id === $vehicle->user_id;
     }
 
-    public function toggleMatchAvailability(User $user, Vehicle $vehicle): bool
-    {
-        return $user->id === $vehicle->user_id;
-    }
 }

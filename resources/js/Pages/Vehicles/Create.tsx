@@ -61,7 +61,6 @@ export default function VehiclesCreate({ vehicleTypes }: VehiclesCreateProps) {
         plate_number: '',
         notes: '',
         is_active: false,
-        is_available_for_match: false,
         photo: null as File | null,
         // Bike-specific
         cc: '',
@@ -382,12 +381,6 @@ export default function VehiclesCreate({ vehicleTypes }: VehiclesCreateProps) {
                                 onChange={(checked) => setData('is_active', checked)}
                                 label="Set as primary vehicle"
                                 description="This vehicle will be displayed as your main ride on your profile"
-                            />
-                            <Switch
-                                checked={data.is_available_for_match}
-                                onChange={(checked) => setData('is_available_for_match', checked)}
-                                label="Available for match"
-                                description="Make this vehicle visible to others looking for a challenge"
                             />
                         </div>
 

@@ -10,22 +10,6 @@ class SystemSettingsSeeder extends Seeder
     public function run(): void
     {
         $settings = [
-            // Match settings
-            [
-                'group' => 'match',
-                'key' => 'enabled',
-                'value' => 'true',
-                'type' => 'boolean',
-                'description' => 'Enable/disable the match feature',
-            ],
-            [
-                'group' => 'match',
-                'key' => 'max_distance_km',
-                'value' => '50',
-                'type' => 'integer',
-                'description' => 'Maximum distance for matching in kilometers',
-            ],
-
             // Vehicle settings
             [
                 'group' => 'vehicles',
@@ -42,13 +26,13 @@ class SystemSettingsSeeder extends Seeder
                 'description' => 'Maximum photo file size in KB',
             ],
 
-            // Challenge settings
+            // Feature flags
             [
-                'group' => 'challenges',
-                'key' => 'expiry_hours',
-                'value' => '24',
-                'type' => 'integer',
-                'description' => 'Hours before a pending challenge expires',
+                'group' => 'features',
+                'key' => 'sos_enabled',
+                'value' => 'true',
+                'type' => 'boolean',
+                'description' => 'Enable or disable the SOS / Emergency feature',
             ],
         ];
 
